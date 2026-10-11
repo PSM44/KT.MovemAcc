@@ -1,0 +1,168 @@
+{
+  "task_id": "KTMA_TASK014_SPECIALIST_RECOVERY",
+  "report_to": "MORCH",
+  "report_from": "RORCH",
+  "timestamp": "2026-10-08",
+
+  "goals_and_loops": {
+    "WS01_PH1_SPECIALIST_RECOVERY": "COMPLETE",
+    "WS02_PH2_CRITERIA": "IN_PROGRESS_SEE_BELOW",
+    "WS03_FM_VALIDATION": "PARTIAL",
+    "WS04_QA_REGRESSION": "COMPLETE",
+    "WS05_DOCUMENTATION": "COMPLETE"
+  },
+
+  "specialist_invocation": {
+    "SPECIALIST_ID": "CLAUDE_CODE_DESKTOP_RORCH_SESSION",
+    "ISSUE_ID": "WS01_PH1_TECHNICAL_RECOVERY",
+    "INVOCATION_EVIDENCE": "SPECIALIST executed directly as Claude Code desktop session (this session) acting as RORCH+SPECIALIST combined per TASK014 directive §06",
+    "SPECIALIST_BACKEND": "CLAUDE_CODE_DESKTOP",
+    "INPUT_SCOPE": {
+      "eplaza_xlsb": "RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb",
+      "impulsa_xlsb": "RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb",
+      "legacy_references": "10_LEGACY/HISTORICAL_REFERENCES/ (Test1.xlsx, test.PH02.xlsx, TesteAcc001.xlsx)",
+      "existing_tests": "06_TESTS/test_ph1.py, 06_TESTS/test_ingestion.py",
+      "failure_evidence": "TASK011 (self-reported COMPLETED, no actual formula generation), TASK012 (PARTIAL_SUCCESS, reconciliation PENDING), TASK013 (self-reported COMPLETED with placeholder output)"
+    },
+    "FILES_CHANGED": [
+      "05_SRC/ph1_engine.py",
+      "06_TESTS/test_ph1_regression.py",
+      "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_RORCH_REPORT.json",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_QA_RESULTS.json",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_MORCH_FINAL_REPORT.json"
+    ],
+    "SPECIALIST_RESULT": "PASS",
+    "RORCH_INDEPENDENT_VERIFICATION": "All 15 regression tests PASS with exit code 0. Output file verified by SHA256 hash match between engine output and test assertion.",
+    "RETURN_STATUS": "PASS"
+  },
+
+  "ph1_metrics": {
+    "PH1_STATUS": "PASS",
+    "eplaza_total_rows_parsed": 287,
+    "eplaza_account_rows": 214,
+    "eplaza_nonzero_accounts": 82,
+    "impulsa_total_rows_parsed": 142,
+    "impulsa_account_rows": 100,
+    "impulsa_nonzero_accounts": 26,
+    "PH1_ACCOUNT_COUNT": 253,
+    "PH1_FORMULA_COUNT": 1518,
+    "PH1_FORMULA_HORIZONTAL": 1518,
+    "PH1_FORMULA_VERTICAL_SUBTOTALS": "generated per heading bucket (53 headings x 6 cols each)",
+    "PH1_FORMULA_GRAND_TOTAL": "1 grand-total row with SUM over subtotals",
+    "PH1_ZERO_HIDDEN": 153,
+    "PH1_AUDIT_COUNT": 207,
+    "PH1_DESC_CONFLICTS": 15,
+    "PH1_IMPULSA_ONLY": 39,
+    "PH1_EPLAZA_ONLY": 153,
+    "PH1_RECONCILIATION": "COMPLETE — RAW_RECONCILIATION sheet embedded in output workbook"
+  },
+
+  "ph1_acceptance_criteria": {
+    "1_parse_complete_xlsb": "PASS — 214 EP + 100 IM account rows extracted",
+    "2_align_all_codes": "PASS — 253 aligned accounts, 0 EP codes dropped",
+    "3_align_codeless_headings": "PASS — 53 headings aligned by normalised text",
+    "4_preserve_titles_bold": "PASS — TITLE rows use bold white-on-dark styling",
+    "5_combine_descriptions_audit": "PASS — combined labels shown as 'EP / IM', 15 conflicts audited",
+    "6_hide_zero_balances": "PASS — 153 zero-balance rows hidden, data preserved",
+    "7_horizontal_formulas": "PASS — 1518 horizontal formulas (=EP+IM for each value column)",
+    "8_vertical_subtotals": "PASS — per-heading SUM formulas + grand total",
+    "9_audit_discrepancies": "PASS — 207 audit entries in AUDIT sheet (15 DESC_CONFLICT, 39 IMPULSA_ONLY, 153 EPLAZA_ONLY)",
+    "10_produce_workbook": "PASS — OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx created",
+    "11_reconcile_raw": "PASS — RAW_RECONCILIATION sheet with source row counts",
+    "12_regression_tests": "PASS — 15/15 tests pass"
+  },
+
+  "ph2_criteria": {
+    "PH2_TOTAL": 35,
+    "PH2_RESOLVED": 0,
+    "PH2_PENDING": 35,
+    "STATUS": "PENDING — WS02 requires HUMAN/IA iteration on the 35 extracted criteria against actual source codes and titles. No criteria invented. Legacy references available in 10_LEGACY/HISTORICAL_REFERENCES/.",
+    "NOTE": "Previous TASK012 found the C.MayorEplaza structure. Full criteria resolution is deferred pending HUMAN gate per directive §02."
+  },
+
+  "fm_preservation": {
+    "FM_PROTECTION": "PARTIAL",
+    "STATUS": "FM_VALIDATION workbook was created in TASK013 at OUTPUT/2026.08/FM2026.08_VALIDATION.xlsx. Pre-execution snapshot and B/C cell validation deferred — TASK013 claimed validation but no independent verification performed. No new FM writes in TASK014. FM workbook not modified.",
+    "FM_FILE": "OUTPUT/2026.08/FM2026.08_VALIDATION.xlsx",
+    "RISK": "FM sheet correctness unverified by TASK014. Recommend explicit HUMAN review before releasing."
+  },
+
+  "qa_summary": {
+    "QA_TESTS_PASS": 15,
+    "QA_TESTS_FAIL": 0,
+    "QA_TOTAL": 15,
+    "QA_EXIT_CODE": 0,
+    "QA_RESULTS_FILE": "08_EVIDENCE/REPORTS/KTMA_TASK014_QA_RESULTS.json",
+    "COVERAGE": [
+      "Source row and account coverage (T01, T02)",
+      "Account-code alignment (T03, T15)",
+      "Code-less headings (T04)",
+      "Zero-balance account hiding (T05)",
+      "Excel horizontal formulas (T06)",
+      "Audit completeness (T07, T11)",
+      "Reconciliation sheet (T08)",
+      "Consolidated account count (T09)",
+      "IMPULSA-only capture (T10)",
+      "Output file existence (T12)",
+      "Report JSON validity (T13)",
+      "Output hash verification (T14)"
+    ]
+  },
+
+  "output_artifacts": {
+    "OUTPUT_PATHS": [
+      "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_RORCH_REPORT.json",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_QA_RESULTS.json",
+      "08_EVIDENCE/REPORTS/KTMA_TASK014_MORCH_FINAL_REPORT.json"
+    ],
+    "OUTPUT_HASHES": {
+      "CAM2026.08_CONSOL.ALIGN.xlsx": "d20c7949f3ae8d4379ed3d2e01cd83f656135bc0025224a558cab4f09c121672",
+      "KTMA_TASK014_RORCH_REPORT.json": "3abc1958be1b1213b85ec809ebc00aec418c320d249305562d2cc3819c77bee9"
+    }
+  },
+
+  "risks_and_defects": [
+    {
+      "id": "R01",
+      "severity": "LOW",
+      "description": "EPLAZA-only accounts (153) dominate — IMPULSA covers a narrower chart of accounts. This is expected given different company scope but should be confirmed by HUMAN.",
+      "status": "OPEN"
+    },
+    {
+      "id": "R02",
+      "severity": "MEDIUM",
+      "description": "15 description conflicts between EP and IM for shared codes. Combined label displayed as 'EP / IM'. HUMAN should review AUDIT sheet for intent.",
+      "status": "OPEN"
+    },
+    {
+      "id": "R03",
+      "severity": "LOW",
+      "description": "FM workbook correctness unverified by this task. FM sheet cell formulas not re-validated.",
+      "status": "OPEN"
+    },
+    {
+      "id": "R04",
+      "severity": "INFO",
+      "description": "1 metadata row ('uf_al_bce') was found in EPLAZA XLSB and correctly excluded from account alignment. Classifier added to parser.",
+      "status": "RESOLVED"
+    }
+  ],
+
+  "cleanup_status": {
+    "obsolete_scripts": "inspect_ph2.py, inspect_fm.py referenced in TASK011 report were never committed to repo — not present in working tree. No cleanup needed.",
+    "pycache": "Cleared during regression run. Regenerated on next execution.",
+    "no_git_transaction": "No git commit executed. HUMAN gate required per directive §05."
+  },
+
+  "next_eligible_dag": "WS02_PH2_CRITERIA_RESOLUTION — resolve 35 PH2 criteria against actual source codes with HUMAN/IA iteration. WS03_FM_VERIFICATION — independent B/C cell snapshot and formula audit. GIT_COMMIT after HUMAN gate.",
+
+  "global_convergence": {
+    "PH1_STATUS": "PASS",
+    "PH2_STATUS": "PENDING",
+    "FM_STATUS": "PARTIAL",
+    "QA_STATUS": "PASS",
+    "OVERALL": "PH1 CONVERGENCE ACHIEVED — first time all 12 acceptance criteria met with passing regression tests and verifiable output artifacts"
+  }
+}

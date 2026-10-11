@@ -1,0 +1,30 @@
+{
+  "task_id": "KTMA_TASK018_PUBLICATION_REDACTION_AND_FINAL_CANDIDATE",
+  "repository_visibility": "PUBLIC",
+  "remote": "https://github.com/PSM44/KT.MovemAcc.git",
+  "financial_data_publication_authorized_for_preparation": true,
+  "final_public_push_authorization": false,
+  "git_prohibited_until_final_gate": ["git init", "git add", "git commit", "git tag", "git push", "release"],
+  "artifact_publication_classes": {
+    "ORIGINAL_LOCAL": "Original evidence retained in workspace and not modified by redaction.",
+    "PUBLIC_REDACTED_COPY": "Deterministic public copy under PUBLIC_RELEASE with personal RUT/tax-ID patterns redacted.",
+    "PUBLIC_UNMODIFIED_FILE": "File proposed for publication without transformation.",
+    "EXCLUDED_FILE": "Runtime, cache, temporary, secret-like, or superseded sensitive original excluded from final allowlist."
+  },
+  "redacted_public_copies": [
+    {
+      "original_local": "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+      "public_redacted_copy": "PUBLIC_RELEASE/10_LEGACY/HISTORICAL_REFERENCES/Test1.PUBLIC_REDACTED.xlsx"
+    },
+    {
+      "original_local": "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx",
+      "public_redacted_copy": "PUBLIC_RELEASE/10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.PUBLIC_REDACTED.xlsx"
+    }
+  ],
+  "financial_approval_status": {
+    "ph1": "TECHNICALLY_TESTED",
+    "ph2_criteria": "NOT_HUMAN_APPROVED",
+    "fm_population": "VALIDATION_ONLY_NOT_FINANCIALLY_APPROVED"
+  },
+  "sensitive_data_policy": "Fail closed on credentials, secrets and unresolved critical disclosures. Real financial accounting amounts remain authorized for preparation, but personal identifiers are published only via redacted copies."
+}

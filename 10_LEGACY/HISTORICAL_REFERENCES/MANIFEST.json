@@ -1,0 +1,20 @@
+{
+  "description": "PH2 historical artifacts",
+  "files": [
+    {
+      "name": "Test1.xlsx",
+      "sha256": "ae02f50721b7d7c783a235d5a4d49e037de508b458044cc07eddfc4cfbf1db27",
+      "copied": true
+    },
+    {
+      "name": "test.PH02.xlsx",
+      "sha256": "eda935a5f0e80a5f33ab04fd6b95ed3365d35fb1e0422cbe7b8a54a8f833ee6b",
+      "copied": true
+    },
+    {
+      "name": "TesteAcc001.xlsx",
+      "sha256": "1143911b40b4b605e1284d6a1c08c76645822d5414c9cb3a463ddb5dcdd8f87e",
+      "copied": true
+    }
+  ]
+}

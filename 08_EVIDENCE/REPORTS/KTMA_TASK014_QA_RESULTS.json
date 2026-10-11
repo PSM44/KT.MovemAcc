@@ -1,0 +1,113 @@
+{
+  "suite": "KTMA_TASK014_PH1_REGRESSION",
+  "pass": 15,
+  "fail": 0,
+  "total": 15,
+  "tests": [
+    {
+      "test": "T01_SOURCE_COVERAGE_EPLAZA",
+      "command": "parse_xlsb(EPLAZA)",
+      "expected": ">= 100 account rows",
+      "observed": "214",
+      "status": "PASS"
+    },
+    {
+      "test": "T02_SOURCE_COVERAGE_IMPULSA",
+      "command": "parse_xlsb(IMPULSA)",
+      "expected": ">= 50 account rows",
+      "observed": "100",
+      "status": "PASS"
+    },
+    {
+      "test": "T03_ACCOUNT_CODE_FORMAT",
+      "command": "all account codes are numeric",
+      "expected": "0 bad codes",
+      "observed": "0",
+      "status": "PASS"
+    },
+    {
+      "test": "T04_CODELESS_HEADINGS",
+      "command": "parse headings",
+      "expected": ">= 5 heading rows in EPLAZA",
+      "observed": "53",
+      "status": "PASS"
+    },
+    {
+      "test": "T05_ZERO_BALANCE_HIDDEN",
+      "command": "ws.row_dimensions[r].hidden",
+      "expected": "> 0 hidden rows",
+      "observed": "153",
+      "status": "PASS"
+    },
+    {
+      "test": "T06_HORIZONTAL_FORMULAS",
+      "command": "count cells starting with '='",
+      "expected": ">= 500",
+      "observed": "2274",
+      "status": "PASS"
+    },
+    {
+      "test": "T07_AUDIT_SHEET",
+      "command": "AUDIT sheet rows",
+      "expected": "sheet exists and > 0 entries",
+      "observed": "exists=True, rows=207",
+      "status": "PASS"
+    },
+    {
+      "test": "T08_RECONCILIATION_SHEET",
+      "command": "wb.sheetnames",
+      "expected": "RAW_RECONCILIATION present",
+      "observed": "['CAM_CONSOL_2026.08', 'AUDIT', 'RAW_RECONCILIATION']",
+      "status": "PASS"
+    },
+    {
+      "test": "T09_CONSOLIDATED_COUNT",
+      "command": "align()",
+      "expected": ">= max(214,100)=214",
+      "observed": "253",
+      "status": "PASS"
+    },
+    {
+      "test": "T10_IMPULSA_ONLY",
+      "command": "align() IMPULSA-only",
+      "expected": "> 0",
+      "observed": "39",
+      "status": "PASS"
+    },
+    {
+      "test": "T11_DESC_CONFLICT",
+      "command": "audit()",
+      "expected": ">= 0 conflicts",
+      "observed": "15",
+      "status": "PASS"
+    },
+    {
+      "test": "T12_OUTPUT_FILE",
+      "command": "OUT_XLSX.stat().st_size",
+      "expected": "> 10 KB",
+      "observed": "63679 bytes",
+      "status": "PASS"
+    },
+    {
+      "test": "T13_REPORT_JSON",
+      "command": "report['ph1_status']",
+      "expected": "PASS",
+      "observed": "PASS",
+      "status": "PASS"
+    },
+    {
+      "test": "T14_OUTPUT_HASH",
+      "command": "sha256(OUT_XLSX)",
+      "expected": "d20c7949f3ae8d43...",
+      "observed": "d20c7949f3ae8d43...",
+      "status": "PASS"
+    },
+    {
+      "test": "T15_NO_EP_CODES_DROPPED",
+      "command": "ep_codes - aligned_codes",
+      "expected": "empty set",
+      "observed": "0 dropped",
+      "status": "PASS"
+    }
+  ]
+}

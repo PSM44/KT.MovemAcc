@@ -1,0 +1,24 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK006_BASELINE_REMEDIATION",
+  "status": "PASS",
+  "allowlist_path": "staging_allowlist.txt",
+  "staging_files": [
+    "./01_CONTINUITY/GIT_PLAN.md",
+    "./04_CONFIG/INGESTION_CONTRACT.json",
+    "./05_SRC/ph1_logic.py",
+    "./05_SRC/__init__.py",
+    "./06_TESTS/SYNTHETIC_TEST_SUITE.md",
+    "./06_TESTS/test_ingestion.py",
+    "./06_TESTS/test_ph1.py",
+    "./06_TESTS/__init__.py",
+    "./AGENTS.md",
+    "./BACKLOG.md",
+    "./CURRENT_STATE.json",
+    "./NEXT_DAG.md",
+    "./README.md",
+    "./ROADMAP.md"
+  ],
+  "gitignore_created": true,
+  "next_dag": ["GIT_AUTHORIZATION", "STAGE_AND_COMMIT"]
+}

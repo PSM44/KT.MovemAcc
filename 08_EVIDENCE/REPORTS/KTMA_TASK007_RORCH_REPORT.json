@@ -1,0 +1,30 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK007_GIT_TRANSACTION_PREFLIGHT",
+  "status": "PASS",
+  "staging_allowlist": [
+    "./01_CONTINUITY/GIT_PLAN.md",
+    "./04_CONFIG/INGESTION_CONTRACT.json",
+    "./05_SRC/ph1_logic.py",
+    "./05_SRC/__init__.py",
+    "./06_TESTS/SYNTHETIC_TEST_SUITE.md",
+    "./06_TESTS/test_ingestion.py",
+    "./06_TESTS/test_ph1.py",
+    "./06_TESTS/__init__.py",
+    "./AGENTS.md",
+    "./BACKLOG.md",
+    "./CURRENT_STATE.json",
+    "./NEXT_DAG.md",
+    "./README.md",
+    "./ROADMAP.md"
+  ],
+  "connectivity": {
+    "remote_reachable": true,
+    "diagnostics": "HTTP 301 received (standard redirect)"
+  },
+  "security": {
+    "sensitive_data_scanned": true,
+    "sensitive_data_found": false
+  },
+  "next_dag": ["GIT_INIT", "GIT_ADD", "GIT_COMMIT", "GIT_REMOTE_ADD", "GIT_PUSH"]
+}

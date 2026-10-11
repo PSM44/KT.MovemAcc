@@ -1,0 +1,12 @@
+{
+  "workstreams": {
+    "WS01_GIT": {"STATUS": "BLOCKED", "BLOCKER": "HUMAN_GATE"},
+    "WS02_RAW": {"STATUS": "IN_PROGRESS"},
+    "WS03_PH1": {"STATUS": "IN_PROGRESS"},
+    "WS04_PH2": {"STATUS": "PENDING"},
+    "WS05_FM": {"STATUS": "PENDING"},
+    "WS06_QA": {"STATUS": "PENDING"},
+    "WS07_DOCS": {"STATUS": "IN_PROGRESS"},
+    "WS08_HYGIENE": {"STATUS": "IN_PROGRESS"}
+  }
+}

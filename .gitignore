@@ -1,0 +1,41 @@
+# Runtime / caches / local environments
+90_RUNTIME/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# OS/System
+.DS_Store
+Thumbs.db
+
+# Credentials/Secrets
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Temporary probes and scratch outputs
+temp_*
+criteria_dump.csv
+inspect_*.py
+dump_sheet.py
+list_columns.py
+check_*_cols.py
+extract_criteria.py
+extract_criteria_v2.py
+extract_criteria_improved.py
+run_ph1.py
+run_ph1_v2.py
+run_ph2.py
+generate_report.py
+generate_task15_report.py
+validate_protection.py
+
+# Publication policy:
+# RAW.INPUT/, OUTPUT/, and PUBLIC_RELEASE/ are not globally ignored because explicitly reviewed financial artifacts may be staged by exact allowlist only.

@@ -1,0 +1,11 @@
+{
+  "project": "KT.MovemAcc",
+  "status": "PUBLIC_RELEASE_PREFLIGHT_PREPARED",
+  "task_id": "KTMA_TASK016_PUBLIC_RELEASE_PREFLIGHT",
+  "repository_visibility": "PUBLIC",
+  "final_public_push_authorization": "NOT_GRANTED",
+  "financial_data_publication_preparation_authorized": true,
+  "ph1_status": "IMPLEMENTED_AND_TESTED",
+  "ph2_status": "PARTIAL_NOT_FINANCIALLY_APPROVED",
+  "fm_status": "VALIDATION_ONLY_NOT_FINANCIALLY_APPROVED"
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK008_NTV_MULTIPATH_EXECUTION",
+  "status": "PASS",
+  "execution_summary": {
+    "goals_total": 8,
+    "goals_pass": 6,
+    "workstreams_active": ["WS02", "WS03", "WS07", "WS08"]
+  },
+  "workstream_states": {
+    "WS01_GIT": "BLOCKED",
+    "WS02_RAW": "IN_PROGRESS",
+    "WS03_PH1": "IN_PROGRESS",
+    "WS04_PH2": "PENDING",
+    "WS05_FM": "PENDING",
+    "WS06_QA": "PENDING",
+    "WS07_DOCS": "IN_PROGRESS",
+    "WS08_HYGIENE": "IN_PROGRESS"
+  },
+  "evidence": [
+    "05_SRC/ingestion/parser.py",
+    "01_CONTINUITY/DAG_DASHBOARD.json"
+  ],
+  "next_eligible_dag": ["RAW_INGESTION_EXECUTION", "PH1_ALIGN_LOGIC"],
+  "human_gate_required": ["GIT_INIT", "AUTH_STAGING", "COMMIT_AND_PUSH"]
+}

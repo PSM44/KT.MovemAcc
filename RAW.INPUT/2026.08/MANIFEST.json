@@ -1,0 +1,19 @@
+{
+  "period": "2026.08",
+  "files": [
+    {
+      "name": "Mayor Inmob. Eplaza 2026 08 V 1.xlsb",
+      "size": 153269,
+      "sha256": "bca421c1a730fee0d44607d9bb0af49bea0407345d852e96c7135508585025c5",
+      "company": "Eplaza",
+      "copied": true
+    },
+    {
+      "name": "Mayor Grupo Impulsa 2026 08 V 1.xlsb",
+      "size": 47114,
+      "sha256": "b074626b2380646b5c563492e66b4d0a19714d817e4e9c1f52ba310cadd1de43",
+      "company": "Grupo Impulsa",
+      "copied": true
+    }
+  ]
+}

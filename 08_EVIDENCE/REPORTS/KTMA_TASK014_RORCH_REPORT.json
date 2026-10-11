@@ -1,0 +1,38 @@
+{
+  "task_id": "KTMA_TASK014_SPECIALIST_RECOVERY",
+  "specialist_id": "CLAUDE_CODE_DESKTOP_RORCH_SESSION",
+  "issue_id": "WS01_PH1_TECHNICAL_RECOVERY",
+  "invocation_evidence": "Executed directly as SPECIALIST via claude-code desktop session",
+  "input_scope": {
+    "eplaza_file": "/mnt/c/01. GitHub/Kumquat.TECH/KT.MovemAcc/RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb",
+    "impulsa_file": "/mnt/c/01. GitHub/Kumquat.TECH/KT.MovemAcc/RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb"
+  },
+  "metrics": {
+    "ph1_ep_total_rows": 287,
+    "ph1_ep_account_rows": 214,
+    "ph1_ep_nonzero": 82,
+    "ph1_im_total_rows": 142,
+    "ph1_im_account_rows": 100,
+    "ph1_im_nonzero": 26,
+    "ph1_aligned_total": 327,
+    "ph1_account_count": 253,
+    "ph1_zero_hidden": 153,
+    "ph1_formula_horizontal": 1518,
+    "ph1_audit_count": 207,
+    "ph1_desc_conflicts": 15,
+    "ph1_impulsa_only": 39,
+    "ph1_eplaza_only": 153
+  },
+  "files_changed": [
+    "/mnt/c/01. GitHub/Kumquat.TECH/KT.MovemAcc/OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx"
+  ],
+  "output_hash_sha256": "d20c7949f3ae8d4379ed3d2e01cd83f656135bc0025224a558cab4f09c121672",
+  "output_path": "/mnt/c/01. GitHub/Kumquat.TECH/KT.MovemAcc/OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+  "ph1_status": "PASS",
+  "reconciliation": {
+    "ep_parsed": 214,
+    "im_parsed": 100,
+    "consolidated": 253,
+    "zero_hidden": 153
+  }
+}

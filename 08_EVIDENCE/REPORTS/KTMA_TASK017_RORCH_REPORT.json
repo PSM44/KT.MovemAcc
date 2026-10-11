@@ -1,0 +1,464 @@
+{
+  "task_id": "KTMA_TASK017_PUBLICATION_GATE_REVIEW",
+  "status": "REVIEW_COMPLETE_FINAL_GATE_NOT_READY_UNTIL_DECISIONS",
+  "evidence_verified": {
+    "task016_report": "08_EVIDENCE/REPORTS/KTMA_TASK016_RORCH_REPORT.json",
+    "manifest": "08_EVIDENCE/REPORTS/KTMA_TASK016_PUBLICATION_MANIFEST.json",
+    "allowlist": "staging_allowlist_TASK016.txt",
+    "sensitive_findings": "08_EVIDENCE/REPORTS/KTMA_TASK016_SENSITIVE_FINDINGS.json",
+    "financial_validation": "08_EVIDENCE/REPORTS/KTMA_TASK016_FINANCIAL_VALIDATION.json",
+    "git_transaction_plan": "08_EVIDENCE/REPORTS/KTMA_TASK016_GIT_TRANSACTION_PLAN.json"
+  },
+  "candidate_file_count": 59,
+  "exact_allowlist": [
+    {
+      "path": ".gitignore",
+      "classification": "DOCUMENTATION",
+      "size": 184,
+      "sha256": "41e10ca068b3b620334350eb32470bf7d09b5d01942e3f1213a72f079948e088"
+    },
+    {
+      "path": ".gitignore.task016.proposed",
+      "classification": "DOCUMENTATION",
+      "size": 547,
+      "sha256": "bbfe66ac4bf2acb5436b4563a2fdc34007fd461a07afae7e9e12356dfa5bcf7a"
+    },
+    {
+      "path": ".pytest_cache/.gitignore",
+      "classification": "DOCUMENTATION",
+      "size": 37,
+      "sha256": "3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd"
+    },
+    {
+      "path": ".pytest_cache/README.md",
+      "classification": "DOCUMENTATION",
+      "size": 302,
+      "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad"
+    },
+    {
+      "path": "01_CONTINUITY/DAG_DASHBOARD.json",
+      "classification": "EVIDENCE",
+      "size": 382,
+      "sha256": "c38a372adcabb2e1d6b850202b29214d8251f1e6ca087c6d77de5dee478c5457"
+    },
+    {
+      "path": "01_CONTINUITY/GIT_ACTION_PLAN.md",
+      "classification": "DOCUMENTATION",
+      "size": 577,
+      "sha256": "52b50a711264f9e84a577a5b0d927d48eb870e0872b9b47555a16de9d14e65fe"
+    },
+    {
+      "path": "01_CONTINUITY/GIT_PLAN.md",
+      "classification": "DOCUMENTATION",
+      "size": 422,
+      "sha256": "77e80d5c12b373cea1a448eeb92beb4b00a633d5ecfc9a49f5e3acf891df421e"
+    },
+    {
+      "path": "03_DOCS/HUMAN/PUBLICATION_PREFLIGHT.md",
+      "classification": "DOCUMENTATION",
+      "size": 996,
+      "sha256": "f2898df0ed9f7eda94fd89366c28b28b6e21066a7b8ff1fde6c42186cd8a41fa"
+    },
+    {
+      "path": "03_DOCS/MACHINE/PUBLICATION_POLICY.json",
+      "classification": "DOCUMENTATION",
+      "size": 724,
+      "sha256": "20e3b08462b50f7958588f08b0dac902a136993aa9cb09cddf313f796ea46fbd"
+    },
+    {
+      "path": "04_CONFIG/CRITERIA/CRITERIA_INVENTORY.json",
+      "classification": "CONFIGURATION",
+      "size": 7226,
+      "sha256": "f970a1532b112b95e4866462c63d50766fe616df10a409b1c3d299607c78a297"
+    },
+    {
+      "path": "04_CONFIG/INGESTION_CONTRACT.json",
+      "classification": "CONFIGURATION",
+      "size": 307,
+      "sha256": "d06c87eb7df129cdbd962e8aae15bcd6d767c1b3d2ac6078f71ff522c55d8faa"
+    },
+    {
+      "path": "05_SRC/__init__.py",
+      "classification": "SOURCE_CODE",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "05_SRC/ingestion/parser.py",
+      "classification": "SOURCE_CODE",
+      "size": 547,
+      "sha256": "3718c06fb1e90465ce408152f0e687db8b21baa4276d5a8db9e04dcbe1fec8cd"
+    },
+    {
+      "path": "05_SRC/ph1_engine.py",
+      "classification": "SOURCE_CODE",
+      "size": 27383,
+      "sha256": "57379eeff4f755567a390cd9a3225c03de0ae925040a100b85ffb024fb3e3ecb"
+    },
+    {
+      "path": "05_SRC/ph1_logic.py",
+      "classification": "SOURCE_CODE",
+      "size": 386,
+      "sha256": "bb1458cc3b33f50e7ad401fa129fee208dd1985b097f89c62c51a0babfcfe8ea"
+    },
+    {
+      "path": "06_TESTS/SYNTHETIC_TEST_SUITE.md",
+      "classification": "TEST",
+      "size": 485,
+      "sha256": "89aa1cf9af8fe29747cdcac016fc7fbc2f6a077f11b7a1dccc5661a0a39072da"
+    },
+    {
+      "path": "06_TESTS/__init__.py",
+      "classification": "TEST",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "06_TESTS/test_ingestion.py",
+      "classification": "TEST",
+      "size": 314,
+      "sha256": "7c821fc20e3f47fcdc1a05ee5540f66880257de0c7fd192a544d12f5df55e2e0"
+    },
+    {
+      "path": "06_TESTS/test_ph1.py",
+      "classification": "TEST",
+      "size": 697,
+      "sha256": "27fdbc4f885c24f2713ca4345bd4253b22c5bbff5daf166a086232b62fddde13"
+    },
+    {
+      "path": "06_TESTS/test_ph1_regression.py",
+      "classification": "TEST",
+      "size": 9381,
+      "sha256": "cc9bcf67533f653031d61ca43a7e3b7545cbc7a8a88aa7a27addba768160f748"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK002_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 2015,
+      "sha256": "9f36736d39428d49a97ae4beacb2c3392dd9678dffe70e3a96569ca745e126d4"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK003_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 733,
+      "sha256": "707599e6244a5f4a33430429e4d052c17f9270c07d4e681e68a4d29690626e26"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK004_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 579,
+      "sha256": "179a876ca30926124f3e5da953fc94d8f7a7b6a6fd6313b1643851a9e4451104"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK005_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 681,
+      "sha256": "d06e52b4dcacad84b39b45619e685cc2d9d1275f27731a552ceab85688d9dab8"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK006_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 670,
+      "sha256": "75688124d9f11724c8e86928889dc46f321734cef35b01e603c96567e81645ed"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK007_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 836,
+      "sha256": "09f5ae35794fe91e0207d92b56884fc8e783af07852faea6f008688b24065160"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK008_NTV_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 752,
+      "sha256": "da8497106eee2f8ddcb78252c9513bedc14e520fbac7848ed0530913bb5cc4e9"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK010_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 389,
+      "sha256": "f06628ef3c36ac52f42b097be3ff140e740bc6a5ff9b5814c9baac26fb46c30e"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK011_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 427,
+      "sha256": "f6d4229db85437d3e3e7b3ef14538f246b0b527bffe6f8c2f9646688ff824063"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK012_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 528,
+      "sha256": "e0a8c5cef6de4745db0d48f42dd130a0e39b3360b9959722cf5557c17e0d6e8d"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK013_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 244,
+      "sha256": "7c71fef0a35eb8f08d96f42c138ce55f303ed8166af5cc5d0d6ad8810dc59a93"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK014_MORCH_FINAL_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 7811,
+      "sha256": "63670c29eb5998e5ffd50a5936f5a2bbd18e1ba8d0c1711010ea55a3b5e75904"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK014_QA_RESULTS.json",
+      "classification": "EVIDENCE",
+      "size": 2840,
+      "sha256": "6f931163dfeaea141702652acae84cd1584ebbbc411043a296af5cd34072a48a"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK014_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 1402,
+      "sha256": "3abc1958be1b1213b85ec809ebc00aec418c320d249305562d2cc3819c77bee9"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK015_RORCH_REPORT.json",
+      "classification": "EVIDENCE",
+      "size": 514,
+      "sha256": "6515f167a011f3922c2388c5a57424dedc6fafa7f90a738b07a7f8967846a789"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK016_FILE_INVENTORY_RAW.json",
+      "classification": "EVIDENCE",
+      "size": 1218768,
+      "sha256": "7bb37e3aec4f768f1af60c70572b36b910c61f0ea90448be0258736de0189810"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK016_FINANCIAL_VALIDATION.json",
+      "classification": "EVIDENCE",
+      "size": 1745,
+      "sha256": "9ea9229d2881d1d68e8cfbff4877e9429fc8381b3d5e5cfb71b753ca509c868d"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK016_PUBLICATION_MANIFEST.json",
+      "classification": "EVIDENCE",
+      "size": 2012180,
+      "sha256": "500b0a836ce4decf6e3f127bd6848cccf3b1667d0e96710841769f71d488db9a"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK016_SENSITIVE_FINDINGS.json",
+      "classification": "EVIDENCE",
+      "size": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "08_EVIDENCE/REPORTS/KTMA_TASK016_XLSB_VALIDATION.json",
+      "classification": "EVIDENCE",
+      "size": 636,
+      "sha256": "592dfc59c0941ede3bf306709e2e662ced1f2e189c804976de3ecd9424ca8faf"
+    },
+    {
+      "path": "10_LEGACY/HISTORICAL_REFERENCES/MANIFEST.json",
+      "classification": "EVIDENCE",
+      "size": 513,
+      "sha256": "bec34bdadeaf1b4edb66b0508bbd02885fd2e5482c5ffa6ce5dd7f0b757db910"
+    },
+    {
+      "path": "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+      "classification": "HISTORICAL_FINANCIAL",
+      "size": 607166,
+      "sha256": "ae02f50721b7d7c783a235d5a4d49e037de508b458044cc07eddfc4cfbf1db27"
+    },
+    {
+      "path": "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx",
+      "classification": "HISTORICAL_FINANCIAL",
+      "size": 274464,
+      "sha256": "1143911b40b4b605e1284d6a1c08c76645822d5414c9cb3a463ddb5dcdd8f87e"
+    },
+    {
+      "path": "10_LEGACY/HISTORICAL_REFERENCES/test.PH02.xlsx",
+      "classification": "HISTORICAL_FINANCIAL",
+      "size": 69771,
+      "sha256": "eda935a5f0e80a5f33ab04fd6b95ed3365d35fb1e0422cbe7b8a54a8f833ee6b"
+    },
+    {
+      "path": "AGENTS.md",
+      "classification": "DOCUMENTATION",
+      "size": 132,
+      "sha256": "1e4232b2105f5b112ddf33199766fe51d8dc6162d0768490ee26a04bf3ec3a2a"
+    },
+    {
+      "path": "BACKLOG.md",
+      "classification": "DOCUMENTATION",
+      "size": 211,
+      "sha256": "ea0ade25f01a9be5b101de9732f76461bada804ea555e7f4f12f1bd32eee6a70"
+    },
+    {
+      "path": "CURRENT_STATE.json",
+      "classification": "CONFIGURATION",
+      "size": 437,
+      "sha256": "29abdeeb95f81dd6f76c36ffb1c7a6afd641f7b91efad7a8b8fe067f77cce44d"
+    },
+    {
+      "path": "FINAL_REPORT.md",
+      "classification": "DOCUMENTATION",
+      "size": 1275,
+      "sha256": "d1930fdbe37960590cf65f264e13f465632dd4413e10a4e2161f3cfbd63bd01a"
+    },
+    {
+      "path": "NEXT_DAG.md",
+      "classification": "DOCUMENTATION",
+      "size": 370,
+      "sha256": "9960466955a6ef3c8f2685f7a29e1adc0907bd376741e3140012154154cb8e06"
+    },
+    {
+      "path": "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+      "classification": "OUTPUT_FINANCIAL",
+      "size": 63679,
+      "sha256": "d20c7949f3ae8d4379ed3d2e01cd83f656135bc0025224a558cab4f09c121672"
+    },
+    {
+      "path": "OUTPUT/2026.08/FM2026.08_VALIDATION.xlsx",
+      "classification": "OUTPUT_FINANCIAL",
+      "size": 69771,
+      "sha256": "eda935a5f0e80a5f33ab04fd6b95ed3365d35fb1e0422cbe7b8a54a8f833ee6b"
+    },
+    {
+      "path": "RAW.INPUT/2026.08/MANIFEST.json",
+      "classification": "RAW_FINANCIAL",
+      "size": 491,
+      "sha256": "04a1154167649317226f3463e2c5b4ab5b828086d12ae6817b5e0ff263c6c96f"
+    },
+    {
+      "path": "RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb",
+      "classification": "RAW_FINANCIAL",
+      "size": 47114,
+      "sha256": "b074626b2380646b5c563492e66b4d0a19714d817e4e9c1f52ba310cadd1de43"
+    },
+    {
+      "path": "RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb",
+      "classification": "RAW_FINANCIAL",
+      "size": 153269,
+      "sha256": "bca421c1a730fee0d44607d9bb0af49bea0407345d852e96c7135508585025c5"
+    },
+    {
+      "path": "README.md",
+      "classification": "DOCUMENTATION",
+      "size": 1381,
+      "sha256": "7192441217e88e435170be4aaf4a69067089ed0369438b10ae0a13fdb1b83ee6"
+    },
+    {
+      "path": "ROADMAP.md",
+      "classification": "DOCUMENTATION",
+      "size": 610,
+      "sha256": "13c662885d9b220532f68006bc9d5bec2ff47b82d208d6900a09f08027bc6069"
+    },
+    {
+      "path": "allowlist.txt",
+      "classification": "DOCUMENTATION",
+      "size": 595,
+      "sha256": "b6d2d7f3174cb8136ab4caa8868db792ef872543ffbf059ae78204fcd6c7c58d"
+    },
+    {
+      "path": "staging_allowlist.txt",
+      "classification": "DOCUMENTATION",
+      "size": 302,
+      "sha256": "109515f1269be37130977b4ee62d346164f4ed898f6fcf55e35f5d8fa2a9b925"
+    },
+    {
+      "path": "staging_allowlist_TASK016.txt",
+      "classification": "DOCUMENTATION",
+      "size": 1887,
+      "sha256": "9d7c34b395a7c196879e4ae09270aebb89c83d710b45d46056348b9ab9500d71"
+    }
+  ],
+  "raw_reconciliation": {
+    "reported_raw_files": 3,
+    "raw_candidates": [
+      {
+        "path": "RAW.INPUT/2026.08/MANIFEST.json",
+        "size": 491,
+        "sha256": "04a1154167649317226f3463e2c5b4ab5b828086d12ae6817b5e0ff263c6c96f"
+      },
+      {
+        "path": "RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb",
+        "size": 47114,
+        "sha256": "b074626b2380646b5c563492e66b4d0a19714d817e4e9c1f52ba310cadd1de43"
+      },
+      {
+        "path": "RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb",
+        "size": 153269,
+        "sha256": "bca421c1a730fee0d44607d9bb0af49bea0407345d852e96c7135508585025c5"
+      }
+    ],
+    "conclusion": "RAW_FILES=3 is explained by two August XLSB inputs plus RAW.INPUT/2026.08/MANIFEST.json; raw workbook count is 2."
+  },
+  "inventory_reconciliation": {
+    "inventoried_files": 5798,
+    "selected_files": 59,
+    "excluded_or_not_selected": 5739,
+    "classification_counts": {
+      "DOCUMENTATION": 17,
+      "UNKNOWN": 2,
+      "EVIDENCE": 22,
+      "CONFIGURATION": 3,
+      "SOURCE_CODE": 4,
+      "TEMPORARY": 5737,
+      "TEST": 5,
+      "HISTORICAL_FINANCIAL": 3,
+      "OUTPUT_FINANCIAL": 2,
+      "RAW_FINANCIAL": 3
+    },
+    "publication_decision_counts": {
+      "PROPOSE_PUBLIC": 59,
+      "REVIEW": 2,
+      "EXCLUDE": 5737
+    },
+    "primary_exclusion_reason": "5737 TEMPORARY files, mostly runtime/cache/probe artifacts; 2 UNKNOWN files require review but are not in allowlist."
+  },
+  "sensitive_disclosure_summary": {
+    "credential_secret_scan_findings": 0,
+    "workbook_disclosure_assessment": "Non-credential sensitive disclosures found in financial workbooks: RUT/tax-ID patterns, bank/payment terminology, person/vendor references, and financial amounts. Values redacted.",
+    "publication_blocker_files_pending_human_decision": [
+      "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+      "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx"
+    ],
+    "evidence": "08_EVIDENCE/REPORTS/KTMA_TASK017_DISCLOSURE_ASSESSMENT.json"
+  },
+  "secret_scan_status": "TASK016 credential/secret scan found zero findings; TASK017 found no credentials in allowlist but did identify non-secret sensitive disclosures requiring decision.",
+  "candidate_hygiene": {
+    "credentials_in_candidate": 0,
+    "unknown_in_candidate": 0,
+    "cache_or_temporary_in_candidate": [
+      ".pytest_cache/.gitignore",
+      ".pytest_cache/README.md"
+    ],
+    "status": "NEEDS_ALLOWLIST_FIX"
+  },
+  "gitignore_status": {
+    "current_gitignore_excludes_RAW_and_OUTPUT": "YES - incompatible with intended publication unless changed",
+    "proposed_gitignore": ".gitignore.task016.proposed",
+    "proposed_gitignore_allows_RAW_OUTPUT": "YES",
+    "issue": "proposed .gitignore excludes .pytest_cache, but current exact allowlist includes .pytest_cache metadata; remove those two files from allowlist."
+  },
+  "documentation_status": "README, ROADMAP, CURRENT_STATE, NEXT_DAG, PUBLICATION_PREFLIGHT and PUBLICATION_POLICY were updated in TASK016 and are present in allowlist.",
+  "git_transaction_sequence": [
+    "PREFLIGHT",
+    "EXACT_STAGE from staging_allowlist only",
+    "STAGED_DIFF_REVIEW",
+    "SENSITIVE_DATA_GATE",
+    "COMMIT",
+    "POST_COMMIT_VERIFY",
+    "PUSH",
+    "POST_PUSH_VERIFY"
+  ],
+  "publication_risks": [
+    "Public disclosure of real accounting workbooks and generated outputs, although authorized in principle.",
+    "RUT/tax-ID patterns in Test1.xlsx and TesteAcc001.xlsx require explicit HUMAN acceptance/redaction decision.",
+    "Candidate allowlist currently includes two .pytest_cache metadata files and should be corrected before staging.",
+    "Current .gitignore still excludes RAW.INPUT and OUTPUT; proposed replacement must be reviewed/applied before publication.",
+    "Local directory is not a Git repository; git auth and remote state have not been verified."
+  ],
+  "human_decisions_required": [
+    "Accept or redact RUT/tax-ID disclosures in historical workbooks",
+    "Remove .pytest_cache files from staging allowlist or explicitly accept them",
+    "Approve proposed .gitignore replacement/change",
+    "Final authorization for git init/add/commit/push/tag remains required"
+  ],
+  "final_gate_ready": false,
+  "recommended_next_action": "Revise exact staging allowlist to remove .pytest_cache files; HUMAN decide on RUT/tax-ID publication; then rerun final allowlist/hash check before Git transaction."
+}

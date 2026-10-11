@@ -1,0 +1,19 @@
+{
+  "task_id": "KTMA_TASK015_PH2_FM_NTV_INTEGRATION",
+  "status": "COMPLETED_PARTIAL",
+  "ph1_crosscheck": "PASS",
+  "ph1_regression": "PASS",
+  "ph1_reconciliation": "VERIFIED_SPECIALIST",
+  "ph2_total": 49,
+  "ph2_resolved": 0,
+  "ph2_ambiguous": 49,
+  "ph2_candidates": 0,
+  "ph2_approved": 0,
+  "fm_protection": "VERIFIED_STRUCTURE",
+  "fm_dry_run": "PENDING",
+  "e2e_synthetic": "PENDING",
+  "qa_pass": 15,
+  "qa_fail": 0,
+  "human_decisions": "REQUIRED_FOR_CRITERIA_APPROVAL",
+  "specialist_escalations": 0
+}

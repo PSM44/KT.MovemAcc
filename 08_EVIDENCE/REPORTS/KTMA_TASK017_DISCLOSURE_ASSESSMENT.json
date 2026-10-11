@@ -1,0 +1,146 @@
+[
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+    "disclosure_findings": [
+      {
+        "finding_type": "RUT_OR_TAX_ID",
+        "occurrence_count_estimate": 102,
+        "severity": "HIGH",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": true
+      },
+      {
+        "finding_type": "BANK_OR_PAYMENT_TERMS",
+        "occurrence_count_estimate": 438,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "PERSON_OR_VENDOR_NAMES",
+        "occurrence_count_estimate": 298,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "FINANCIAL_AMOUNTS",
+        "occurrence_count_estimate": 3877,
+        "severity": "AUTHORIZED_FINANCIAL",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      }
+    ]
+  },
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx",
+    "disclosure_findings": [
+      {
+        "finding_type": "RUT_OR_TAX_ID",
+        "occurrence_count_estimate": 102,
+        "severity": "HIGH",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": true
+      },
+      {
+        "finding_type": "BANK_OR_PAYMENT_TERMS",
+        "occurrence_count_estimate": 438,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "PERSON_OR_VENDOR_NAMES",
+        "occurrence_count_estimate": 300,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "FINANCIAL_AMOUNTS",
+        "occurrence_count_estimate": 3832,
+        "severity": "AUTHORIZED_FINANCIAL",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      }
+    ]
+  },
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/test.PH02.xlsx",
+    "disclosure_findings": [
+      {
+        "finding_type": "BANK_OR_PAYMENT_TERMS",
+        "occurrence_count_estimate": 47,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "PERSON_OR_VENDOR_NAMES",
+        "occurrence_count_estimate": 47,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "FINANCIAL_AMOUNTS",
+        "occurrence_count_estimate": 1046,
+        "severity": "AUTHORIZED_FINANCIAL",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      }
+    ]
+  },
+  {
+    "path": "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+    "disclosure_findings": [
+      {
+        "finding_type": "BANK_OR_PAYMENT_TERMS",
+        "occurrence_count_estimate": 78,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "PERSON_OR_VENDOR_NAMES",
+        "occurrence_count_estimate": 71,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "FINANCIAL_AMOUNTS",
+        "occurrence_count_estimate": 793,
+        "severity": "AUTHORIZED_FINANCIAL",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      }
+    ]
+  },
+  {
+    "path": "OUTPUT/2026.08/FM2026.08_VALIDATION.xlsx",
+    "disclosure_findings": [
+      {
+        "finding_type": "BANK_OR_PAYMENT_TERMS",
+        "occurrence_count_estimate": 47,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "PERSON_OR_VENDOR_NAMES",
+        "occurrence_count_estimate": 47,
+        "severity": "MEDIUM",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      },
+      {
+        "finding_type": "FINANCIAL_AMOUNTS",
+        "occurrence_count_estimate": 1046,
+        "severity": "AUTHORIZED_FINANCIAL",
+        "locations": "workbook XML/sharedStrings/worksheets; values redacted",
+        "publication_blocker": false
+      }
+    ]
+  }
+]

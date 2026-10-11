@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "RAW_INPUT": "Completed in TASK009",
+    "PH2_RECOVERY": "Completed",
+    "PH1_PARSING": "Blocked: No xlsb library available in environment",
+    "FM_VALIDATION": "Blocked: Dependent on PH2/PH1"
+  },
+  "files": {
+    "10_LEGACY/HISTORICAL_REFERENCES/MANIFEST.json": "Created"
+  },
+  "blockers": [
+    "Missing pyxlsb/pandas/openpyxl: Cannot parse XLSB/XLSX files"
+  ]
+}

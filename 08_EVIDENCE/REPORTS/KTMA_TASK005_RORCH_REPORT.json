@@ -1,0 +1,25 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK005_GIT_BASELINE_GATE",
+  "parent_task": "KTMA_TASK004_BASELINE_READINESS_AND_PH1_TESTS",
+  "status": "PASS",
+  "staging_analysis": {
+    "recommended_allowlist": [
+      "README.md",
+      "AGENTS.md",
+      "ROADMAP.md",
+      "BACKLOG.md",
+      "00_GOVERNANCE/",
+      "01_CONTINUITY/GIT_PLAN.md",
+      "03_DOCS/",
+      "04_CONFIG/INGESTION_CONTRACT.json",
+      "05_SRC/",
+      "06_TESTS/",
+      "07_TOOLS/",
+      "08_EVIDENCE/REPORTS/"
+    ]
+  },
+  "git_ignore": "REQUIRED_ACTION: Generate .gitignore",
+  "next_dag": ["AUTHORIZE_GIT_INIT", "GENERATE_GITIGNORE"],
+  "blockers": ["GIT_INIT_NOT_ALLOWED"]
+}

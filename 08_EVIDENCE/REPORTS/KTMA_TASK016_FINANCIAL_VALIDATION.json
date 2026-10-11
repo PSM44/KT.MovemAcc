@@ -1,0 +1,73 @@
+[
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/test.PH02.xlsx",
+    "size": 69771,
+    "sha256": "eda935a5f0e80a5f33ab04fd6b95ed3365d35fb1e0422cbe7b8a54a8f833ee6b",
+    "readable": true,
+    "sheets": [
+      "CAM2026.08_CONSOL.ALIGN",
+      "RAW_EPLAZA",
+      "RAW_IMPULSA",
+      "AUDIT.PH1",
+      "CONTROL",
+      "FM",
+      "Criterios",
+      "AUDIT.PH2"
+    ]
+  },
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+    "size": 607166,
+    "sha256": "ae02f50721b7d7c783a235d5a4d49e037de508b458044cc07eddfc4cfbf1db27",
+    "readable": true,
+    "sheets": [
+      "CM2026.08_IMPULSA",
+      "CM2026.08_EPLAZA",
+      "MY2026.08_EPLAZA",
+      "MY2026.08_IMPULSA",
+      "CAM2026.08_CONSOL",
+      "CAM2026.08_CONSOL.ALIGN",
+      "SC.01",
+      "AUDIT"
+    ]
+  },
+  {
+    "path": "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx",
+    "size": 274464,
+    "sha256": "1143911b40b4b605e1284d6a1c08c76645822d5414c9cb3a463ddb5dcdd8f87e",
+    "readable": true,
+    "sheets": [
+      "MayorImpulsa",
+      "MayorEplaza",
+      "C.MayorImpulsa",
+      "C.MayorEplaza"
+    ]
+  },
+  {
+    "path": "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx",
+    "size": 63679,
+    "sha256": "d20c7949f3ae8d4379ed3d2e01cd83f656135bc0025224a558cab4f09c121672",
+    "readable": true,
+    "sheets": [
+      "CAM_CONSOL_2026.08",
+      "AUDIT",
+      "RAW_RECONCILIATION"
+    ]
+  },
+  {
+    "path": "OUTPUT/2026.08/FM2026.08_VALIDATION.xlsx",
+    "size": 69771,
+    "sha256": "eda935a5f0e80a5f33ab04fd6b95ed3365d35fb1e0422cbe7b8a54a8f833ee6b",
+    "readable": true,
+    "sheets": [
+      "CAM2026.08_CONSOL.ALIGN",
+      "RAW_EPLAZA",
+      "RAW_IMPULSA",
+      "AUDIT.PH1",
+      "CONTROL",
+      "FM",
+      "Criterios",
+      "AUDIT.PH2"
+    ]
+  }
+]

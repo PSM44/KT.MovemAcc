@@ -1,0 +1,20 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK004_BASELINE_READINESS_AND_PH1_TESTS",
+  "parent_task": "KTMA_TASK003_BASELINE_AND_INGESTION_PREP",
+  "status": "PASS",
+  "git_baseline_ready": true,
+  "tests": [
+    {
+      "test_id": "TEST_PH1_ALIGN",
+      "status": "PASS"
+    },
+    {
+      "test_id": "TEST_INGESTION_CONTRACT",
+      "status": "PASS"
+    }
+  ],
+  "evidence": ["05_SRC/ph1_logic.py", "06_TESTS/test_ph1.py", "06_TESTS/test_ingestion.py"],
+  "next_dag": ["GIT_INIT", "RAW_INGESTION_EXECUTION"],
+  "blockers": ["GIT_AUTHORIZATION_REQUIRED"]
+}

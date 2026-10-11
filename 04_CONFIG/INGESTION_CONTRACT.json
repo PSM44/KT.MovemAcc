@@ -1,0 +1,13 @@
+[
+  {
+    "contract_id": "RAW_INGESTION_CONTRACT_V1",
+    "description": "Schema for monthly RAW ingestion (EPLAZA/IMPULSA)",
+    "fields": {
+      "account_code": "STRING",
+      "account_title": "STRING",
+      "currency_clp": "FLOAT",
+      "currency_uf": "FLOAT",
+      "period": "DATE_ISO"
+    }
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "redaction_validation": [
+    {
+      "original_path": "10_LEGACY/HISTORICAL_REFERENCES/Test1.xlsx",
+      "redacted_path": "PUBLIC_RELEASE/10_LEGACY/HISTORICAL_REFERENCES/Test1.PUBLIC_REDACTED.xlsx",
+      "original_preserved": true,
+      "redacted_readable": true,
+      "worksheet_identities_preserved": true,
+      "formulas_preserved": true,
+      "numeric_values_preserved": false,
+      "residual_rut_or_tax_id_patterns": 0,
+      "redaction_count": 778
+    },
+    {
+      "original_path": "10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.xlsx",
+      "redacted_path": "PUBLIC_RELEASE/10_LEGACY/HISTORICAL_REFERENCES/TesteAcc001.PUBLIC_REDACTED.xlsx",
+      "original_preserved": true,
+      "redacted_readable": true,
+      "worksheet_identities_preserved": true,
+      "formulas_preserved": true,
+      "numeric_values_preserved": false,
+      "residual_rut_or_tax_id_patterns": 0,
+      "redaction_count": 778
+    }
+  ],
+  "allowlist_count": 61,
+  "pytest_cache_in_allowlist": [],
+  "original_sensitive_workbooks_in_allowlist": [],
+  "gitignore_has_pytest_cache": true,
+  "gitignore_does_not_globally_ignore_raw": false,
+  "gitignore_does_not_globally_ignore_output": false,
+  "gitignore_does_not_globally_ignore_public_release": false
+}

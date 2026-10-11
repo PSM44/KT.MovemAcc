@@ -1,0 +1,345 @@
+[
+  {
+    "item": "VENTAS",
+    "eplaza_val": NaN,
+    "impulsa_val": NaN,
+    "total_val": NaN,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Departamentos",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Bodegas Dptos",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Estacionamientos Dptos",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Locales",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Bodegas Locales",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Estacionamientos Locales",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Oficinas",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Bodega Oficinas",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Estacionamiento Oficinas",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Total ventas",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "EGRESOS",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Terreno  Neto",
+    "eplaza_val": 180096.35,
+    "impulsa_val": 0.0,
+    "total_val": 180096.35,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Comisi\u00f3n terreno",
+    "eplaza_val": 3600.07,
+    "impulsa_val": 0.0,
+    "total_val": 3600.07,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Financiamieno terreno",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Dif de cambio",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Estructuraci\u00f3n",
+    "eplaza_val": 4000.0,
+    "impulsa_val": 0.0,
+    "total_val": 4000.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Otros Terreno",
+    "eplaza_val": 489.35,
+    "impulsa_val": 0.0,
+    "total_val": 489.35,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Costos Construcci\u00f3n y Especialidades",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Derechos",
+    "eplaza_val": 1559.1399999999999,
+    "impulsa_val": 0.0,
+    "total_val": 1559.1399999999999,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Demolici\u00f3n y Obras exteriores",
+    "eplaza_val": 1696.68,
+    "impulsa_val": 0.0,
+    "total_val": 1696.68,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Construcci\u00f3n  (Incl. IVB)",
+    "eplaza_val": 248451.58,
+    "impulsa_val": 0.0,
+    "total_val": 248451.58,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Cr\u00e9dito especial IVA",
+    "eplaza_val": -5702.33,
+    "impulsa_val": 0.0,
+    "total_val": -5702.33,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Honorarios Post venta y Plan OK",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Empalmes",
+    "eplaza_val": 3253.06,
+    "impulsa_val": 0.0,
+    "total_val": 3253.06,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Honorario Especialistas",
+    "eplaza_val": 17836.329999999998,
+    "impulsa_val": 38.05999999999999,
+    "total_val": 17874.39,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Adecuaci\u00f3n oficinas",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "SUBTOTAL COSTOS DIRECTOS",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Costos Comercializaci\u00f3n y Administraci\u00f3n",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Gastos Comunes, mantenci\u00f3n y Contribuciones",
+    "eplaza_val": 3712.14,
+    "impulsa_val": 0.0,
+    "total_val": 3712.14,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Marketing",
+    "eplaza_val": 8717.18,
+    "impulsa_val": 0.0,
+    "total_val": 8717.18,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Comercializaci\u00f3n",
+    "eplaza_val": 2389.18,
+    "impulsa_val": 0.0,
+    "total_val": 2389.18,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Administraci\u00f3n (Honorario fijo)",
+    "eplaza_val": 16360.0,
+    "impulsa_val": 0.0,
+    "total_val": 16360.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Imprevistos",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Gasto Financiero",
+    "eplaza_val": 62035.94,
+    "impulsa_val": 0.0,
+    "total_val": 62035.94,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Gastos Generales",
+    "eplaza_val": 1186.5800000000002,
+    "impulsa_val": 0.0,
+    "total_val": 1186.5800000000002,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "P\u00f3lizas de venta en verde",
+    "eplaza_val": 439.71,
+    "impulsa_val": 0.0,
+    "total_val": 439.71,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "SUBTOTAL COSTOS INDIRECTOS",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Total Inversi\u00f3n",
+    "eplaza_val": 550120.96,
+    "impulsa_val": 0.0,
+    "total_val": 550120.96,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "IVA",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "RESULTADO ANTES DE FEE E IMPUESTOS",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Fee PROYECTO",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "RESULTADO ANTES DE IMPUESTOS ANTES DE CP",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Costo Financiero Capital Preferente",
+    "eplaza_val": 13192.8,
+    "impulsa_val": -14090.15,
+    "total_val": -897.3500000000004,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "RESULTADO DESPUES DE CP",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Rentabilidad del Proyecto",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Capital requerido para el proyecto (incluido terreno)",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Capital Preferente ya obtenido",
+    "eplaza_val": NaN,
+    "impulsa_val": 0.0,
+    "total_val": 0.0,
+    "status": "EXTRACTED"
+  },
+  {
+    "item": "Rentabilidad sobre el capital invertido",
+    "eplaza_val": NaN,
+    "impulsa_val": 17.64,
+    "total_val": 17.64,
+    "status": "EXTRACTED"
+  }
+]

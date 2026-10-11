@@ -1,0 +1,25 @@
+{
+  "schema_version": "RORCH_TO_MORCH_V1",
+  "task_id": "KTMA_TASK003_BASELINE_AND_INGESTION_PREP",
+  "parent_task": "KTMA_TASK002_BOOTSTRAP_RECONCILIATION",
+  "status": "PASS",
+  "inventory": {
+    "raw_input_empty": true,
+    "legacy_empty": true,
+    "src_empty": true,
+    "tests_prepared": ["SYNTHETIC_TEST_SUITE.md"],
+    "config_prepared": ["INGESTION_CONTRACT.json"]
+  },
+  "git_plan": {
+    "status": "PLAN_PREPARED",
+    "execution_blocked": true
+  },
+  "tests": [
+    {
+      "test_id": "TEST_PREP_001",
+      "status": "PASS"
+    }
+  ],
+  "evidence": ["04_CONFIG/INGESTION_CONTRACT.json", "06_TESTS/SYNTHETIC_TEST_SUITE.md", "01_CONTINUITY/GIT_PLAN.md"],
+  "next_dag": ["GIT_INIT", "RAW_INGESTION_CONTRACT_VALIDATION"]
+}
