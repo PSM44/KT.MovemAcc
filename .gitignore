@@ -1,5 +1,9 @@
 # Runtime / caches / local environments
 90_RUNTIME/
+DATA/*.sqlite
+DATA/*.sqlite-*
+DATA/*.db
+DATA/*.db-*
 .venv/
 env/
 __pycache__/
