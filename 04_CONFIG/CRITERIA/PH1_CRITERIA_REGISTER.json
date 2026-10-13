@@ -1,0 +1,22 @@
+{
+  "version": "PH1_CRITERIA_V1_TASK029",
+  "effective_period": "2026.08",
+  "approval_status": "HUMAN_MORCH_APPROVED",
+  "criteria": [
+    {"id":"CR-001","company":"EPLAZA","cell":"G23","formula":"=SUM(G24)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-002","company":"IMPULSA","cell":"G39","formula":"=SUM(G4,G8,G10,G12,G16,G20,G27,G34,G36)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-003","company":"EPLAZA","cell":"G160","formula":"=SUM(G4,G9,G11,G13,G15,G17,G23,G25,G31,G55)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-004","company":"EPLAZA","cell":"G55","formula":"=SUM(G57,G111)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-005","company":"EPLAZA","cell":"G111","formula":"HUMAN_APPROVED_DIRECT_SUBTOTALS_UNDER_GASTOS_ACTIVADOS","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-006","company":"EPLAZA","cell":"G191","formula":"=SUM(G192:G193)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-007","company":"IMPULSA","cell":"G57","formula":"immediate child accounts if reconciles RAW","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-008","company":"EPLAZA","cell":"G219","formula":"=SUM(G162,G164,G167,G171,G174,G178,G180,G191,G194,G197,G205,G207)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-009","company":"IMPULSA","cell":"G84","formula":"=SUM(G41,G44,G46,G49,G55,G57,G61,G69,G71)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-010","company":"EPLAZA","cell":"G221","formula":"=SUM(G160,G219)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-011","company":"IMPULSA","cell":"G86","formula":"=SUM(G39,G84)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-012","company":"EPLAZA","cell":"G280","formula":"=-G221","validation_rule":"preserve sign"},
+    {"id":"CR-013","company":"IMPULSA","cell":"G135","formula":"=-G86","validation_rule":"preserve sign"},
+    {"id":"CR-014","company":"EPLAZA","cell":"G282","formula":"=SUM(G160,G219,G280)","validation_rule":"UF tolerance 0.01"},
+    {"id":"CR-015","company":"IMPULSA","cell":"G137","formula":"=SUM(G39,G84,G135)","validation_rule":"UF tolerance 0.01"}
+  ]
+}

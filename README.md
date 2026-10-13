@@ -6,9 +6,13 @@ Accounting integration workspace for RAW EPLAZA + RAW IMPULSA → PH1 alignment 
 
 This workspace is being prepared for a **public** repository publication candidate. HUMAN authorized preparation that includes real accounting RAW files, historical workbooks, Funding Memo templates and generated financial outputs. Final public push authorization is **not granted**.
 
+## PH1 use case
+
+Start here for the HUMAN-facing Spanish PH1 workflow: [`03_DOCS/HUMAN/UseCase_PH1.md`](03_DOCS/HUMAN/UseCase_PH1.md).
+
 ## Current implementation status
 
-- PH1: IMPLEMENTED and regression-tested using real August 2026 inputs.
+- PH1: HUMAN-accepted functional baseline; implemented and regression-tested using real August 2026 inputs.
 - PH2 criteria: PARTIAL; extracted/candidate criteria are **not financially approved**.
 - FM: VALIDATION-only; no unresolved financial cells should be treated as approved population.
 - Git publication: PENDING final HUMAN gate.
