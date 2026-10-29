@@ -91,6 +91,15 @@ def main():
     ph15_query.add_argument("--account-code", help="Account code for account/consolidated lookups.")
     ph15_query.add_argument("--semantic-key", help="Semantic key for consolidated lookups.")
 
+    fm_parser = subparsers.add_parser("funding-memo", help="Build the controlled accounting-to-Funding-Memo product")
+    fm_parser.add_argument("--period", required=True)
+    fm_parser.add_argument("--root", default=".")
+    fm_parser.add_argument("--template", required=True, help="Funding Memo template; never overwritten")
+    fm_parser.add_argument("--consolidated", required=True, help="Real CAM workbook providing TOTAL.VALORES_UF")
+    fm_parser.add_argument("--raw-eplaza")
+    fm_parser.add_argument("--raw-impulsa")
+    fm_parser.add_argument("--out-dir", required=True, help="New non-colliding output directory under project root")
+
     args = parser.parse_args()
 
     if args.command == "ph1":
@@ -158,6 +167,46 @@ def main():
             semantic_key=args.semantic_key,
         )
         print(json.dumps(result, indent=2, ensure_ascii=False))
+    elif args.command == "funding-memo":
+        from kt_movemacc.funding_memo import DECISION_ID, build_funding_memo
+
+        root = Path(args.root).resolve()
+        out_dir = Path(args.out_dir).resolve()
+        try:
+            out_dir.relative_to(root)
+        except ValueError as exc:
+            raise SystemExit("ROOT_BOUNDARY_DENIED: Funding Memo output must remain under project root") from exc
+        if out_dir.exists():
+            raise SystemExit(f"OUTPUT_COLLISION_DENIED: {out_dir}")
+        template = Path(args.template).resolve()
+        consolidated = Path(args.consolidated).resolve()
+        eplaza, impulsa = _standard_raw_paths(root, args.period)
+        if args.raw_eplaza:
+            eplaza = Path(args.raw_eplaza).resolve()
+        if args.raw_impulsa:
+            impulsa = Path(args.raw_impulsa).resolve()
+        for source in (template, consolidated, eplaza, impulsa):
+            if not source.is_file():
+                raise SystemExit(f"SOURCE_NOT_FOUND: {source}")
+        decision_path = root / "04_CONFIG" / "FUNDING_MEMO" / "KTMA_FM_DECISIONS.jsonl"
+        decision = json.loads(decision_path.read_text(encoding="utf-8").splitlines()[-1])
+        if decision.get("DECISION_ID") != DECISION_ID or decision.get("STATUS") != "IMPLEMENTED":
+            raise SystemExit("MAPPING_DECISION_NOT_IMPLEMENTED")
+        out_dir.mkdir(parents=True, exist_ok=False)
+        payload = build_funding_memo(
+            template=template,
+            consolidated=consolidated,
+            output=out_dir / f"FM{args.period}_ACCOUNTING_MAPPING_V1.xlsx",
+            period=args.period,
+            raw_eplaza=eplaza,
+            raw_impulsa=impulsa,
+            mapping_csv=out_dir / "KTMA_FM_MAPPING_MASTER_V1.csv",
+            results_json=out_dir / "KTMA_FM_RESULTS_V1.json",
+            unassigned_csv=out_dir / "KTMA_FM_UNASSIGNED_V1.csv",
+            conceptual_md=out_dir / "KTMA_FM_MAPPING_CONCEPTUAL_V1.md",
+            decision_record=decision,
+        )
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
         parser.print_help()
         raise SystemExit(2)
