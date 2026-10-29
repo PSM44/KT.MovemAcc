@@ -32,6 +32,27 @@ The workbook must contain exactly:
 4. `AUDIT.PH1`
 5. `CONTROL`
 
+`AUDIT.PH1` has the following column contract. The six legacy fields are
+preserved after the three identity fields:
+
+| Column | Field | Identity meaning |
+| --- | --- | --- |
+| A | `AUDIT_ID` | Permanent semantic finding identity. |
+| B | `OBSERVATION_ID` | Deterministic period/source occurrence identity. |
+| C | `PERIOD` | Accounting period supplied to PH1. |
+| D | `SEVERIDAD` | Existing severity. |
+| E | `EMPRESA` | `ENTITY`. |
+| F | `HALLAZGO` | `FINDING_CLASS`. |
+| G | `CLAVE` | Existing display key; the engine retains a separate semantic node key for identity. |
+| H | `DETALLE` | Existing observation detail. |
+| I | `UBICACION` | `SOURCE_REFERENCE`. |
+
+For account findings, `SOURCE_ACCOUNT_OR_NODE` is the account code. For
+code-less headings it is the normalized heading plus its semantic occurrence
+key (for example `TOTAL ACTIVO#1`). Criteria observations use their `CR-nnn`
+rule identifier. These semantic values are held by `AuditEntry.node_key`; the
+legacy `CLAVE` text remains unchanged in the workbook.
+
 CM sheets preserve the financial A:J layout and add K `VISIBILIDAD_UF` for UF-only presentation filtering. `MOSTRAR` is applied to nonzero UF account/group rows and auditable ambiguous hierarchy rows; `OCULTAR` is presentation-only and never deletes records. CAM exposes these canonical business fields:
 
 - `EPLAZA.VALORES_UF`
@@ -47,6 +68,29 @@ CAM does not expose `BALANCE_UF` or `BALANCE_CLP`.
 Leaf accounts align by stable account code. If both companies have the same code but different descriptions, the account is aligned financially and the description conflict is recorded in `AUDIT.PH1`.
 
 Code-less headings are keyed by normalized heading text plus occurrence count. This prevents repeated labels such as `VALORES NEGOCIABLES` from being merged solely by text.
+
+## Stable Audit Identity
+
+`AUDIT_ID` has the form
+`KTMA.PH1.<ENTITY>.<FINDING_CLASS>.<NODE_TOKEN>.<IDENTITY_DIGEST>`.
+Its digest covers the exact entity, existing finding name, and stable account or
+semantic node key. It excludes period, timestamp, run directory, source hash,
+worksheet row, and worksheet location. The readable token is not trusted by
+itself: the exact-identity digest prevents normalized-token collisions such as
+`A-B` versus `A_B`. A runtime collision between distinct exact identities is a
+hard error.
+
+Repeated occurrences of the same exact identity retain the same `AUDIT_ID` but
+receive explicit duplicate ordinals and distinct `OBSERVATION_ID` values; they
+are not deduplicated. If no account or semantic node key exists, the entry is
+marked `IDENTITY_ADJUDICATION_REQUIRED` instead of pretending the fallback is
+an approved identity.
+
+`OBSERVATION_ID` has the form `KTMA.PH1.OBS.<PERIOD>.<DIGEST>`. Its digest
+includes `AUDIT_ID`, period, the two source hashes as an unordered fingerprint,
+source reference, detail, and duplicate ordinal. It is deterministic for the
+same inputs and intentionally changes across accounting periods or changed
+source occurrences.
 
 ## Formula Generation
 CM subtotal formulas are generated only when source-derived leaf account membership reconciles to the source heading values within tolerance:
@@ -88,3 +132,20 @@ Current PH1 status for the August 2026 HUMAN-accepted baseline is technically ve
 ## Approved PH1 Criteria
 
 HUMAN–MORCH approved CR-001 through CR-015 are stored in `04_CONFIG/CRITERIA/PH1_CRITERIA_REGISTER.json`. Historical cell addresses are evidence; runtime matching must use stable account codes and hierarchy-aware identifiers where implemented. PH2/Funding Memo criteria remain out of scope.
+
+## HUMAN Audit Decision Registry
+
+`04_CONFIG/CRITERIA/PH1_AUDIT_DECISIONS.json` is an append-oriented governance
+registry for audit decisions. Its initial TASK080 records are all
+`PENDING_REVIEW`, have no approver or approval timestamp, and carry
+`IMPLEMENTATION_AUTHORIZATION=NOT_AUTHORIZED`. Approved classification and
+hierarchy criteria, rejected proposals, and superseded criteria have distinct
+status values; approved history must be superseded by a new record rather than
+overwritten. This registry is reviewable governance evidence, not productive
+cryptographic authorization.
+
+The retained Eplaza catalog context (447 nodes; 179/214 source accounts matched;
+35 source-only codes; 116 parent-label/level differences; two unresolved parent
+relationships) is evidence only. A code reference or PDF hash/page reference
+does not approve a classification, close a warning, or create a new accounting
+rule.

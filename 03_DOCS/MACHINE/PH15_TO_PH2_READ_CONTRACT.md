@@ -18,6 +18,13 @@ Not allowed:
 - writes, updates, deletes, schema changes, or source-history replacement
 - Funding Memo mapping, FM0 comparisons, or PH2 business rules
 
+Single-writer policy:
+
+- Windows is the only authorized writer or migration runtime for the canonical `DATA/KTMA.sqlite`.
+- WSL2 consumers must use the read-only query contract or delegate canonical writes to Windows.
+- The platform guard does not prohibit writes to disposable databases outside the canonical path for isolated tests.
+- Do not perform simultaneous cross-environment writes. Use SQLite backup for consistent snapshots; retain the existing rollback journal unless a separately authorized WAL policy is adopted.
+
 ## Commands
 
 ```powershell

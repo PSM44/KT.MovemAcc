@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import platform
 import sqlite3
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
@@ -18,9 +19,20 @@ from typing import Iterable, Optional
 
 from kt_movemacc import engine
 from kt_movemacc.cli import _standard_raw_paths
+from kt_movemacc.root_boundary import (
+    BoundaryGuard,
+    reconcile_failed_mutation,
+    reconcile_side_effects,
+    require_boundary_guard,
+    snapshot_tree_metadata,
+)
 
 SCHEMA_VERSION = 1
 DEFAULT_DB_PATH = Path("DATA") / "KTMA.sqlite"
+CANONICAL_DB_PATHS = (
+    Path(r"C:\01. GitHub\Kumquat.TECH\KT.MovemAcc\DATA\KTMA.sqlite"),
+    Path("/mnt/c/01. GitHub/Kumquat.TECH/KT.MovemAcc/DATA/KTMA.sqlite"),
+)
 ENTITY_CODES = ("EPLAZA", "IMPULSA")
 DECIMAL_SCALE = Decimal("0.000001")
 
@@ -49,12 +61,53 @@ def decimal_text(value: object, places: Decimal = DECIMAL_SCALE) -> str:
     return str(dec.quantize(places, rounding=ROUND_HALF_UP))
 
 
-def connect(db_path: Path = DEFAULT_DB_PATH, *, read_only: bool = False) -> sqlite3.Connection:
+class CanonicalWritePlatformError(RuntimeError):
+    """Raised when a non-Windows process attempts a canonical SQLite write."""
+
+
+def _is_canonical_database_path(db_path: Path) -> bool:
+    requested = Path(db_path).resolve(strict=False)
+    for path in CANONICAL_DB_PATHS:
+        canonical = path.resolve(strict=False)
+        if requested == canonical:
+            return True
+        try:
+            if requested.exists() and canonical.exists() and requested.samefile(canonical):
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def _assert_write_platform(db_path: Path) -> None:
+    if _is_canonical_database_path(db_path) and platform.system() != "Windows":
+        raise CanonicalWritePlatformError(
+            "Canonical SQLite writes are authorized only from Windows. "
+            "From WSL/Linux, use ph15-query/read-only access or delegate ph15-db to Windows."
+        )
+
+
+def connect(
+    db_path: Path = DEFAULT_DB_PATH,
+    *,
+    read_only: bool = False,
+    boundary_guard: BoundaryGuard | None = None,
+) -> sqlite3.Connection:
     db_path = Path(db_path)
     if read_only:
         uri = f"file:{db_path.resolve().as_posix()}?mode=ro"
         conn = sqlite3.connect(uri, uri=True)
     else:
+        guard = require_boundary_guard(boundary_guard, "ph15_database.connect")
+        db_path = guard.resolve(db_path)
+        sidecars = [Path(f"{db_path}{suffix}") for suffix in ("-journal", "-wal", "-shm")]
+        guard.authorize(
+            operation="overwrite" if db_path.exists() else "create",
+            requested_target=db_path,
+            resolved_physical_destination=db_path,
+            indirect_outputs=sidecars,
+        )
+        _assert_write_platform(db_path)
         db_path.parent.mkdir(parents=True, exist_ok=True)
         conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
@@ -62,9 +115,30 @@ def connect(db_path: Path = DEFAULT_DB_PATH, *, read_only: bool = False) -> sqli
     return conn
 
 
-def initialize_database(db_path: Path = DEFAULT_DB_PATH) -> None:
-    with connect(db_path) as conn:
-        apply_migrations(conn)
+def initialize_database(
+    db_path: Path = DEFAULT_DB_PATH,
+    *,
+    boundary_guard: BoundaryGuard | None = None,
+) -> None:
+    guard = require_boundary_guard(boundary_guard, "ph15_database.initialize_database")
+    resolved = guard.resolve(db_path)
+    sidecars = [Path(f"{resolved}{suffix}") for suffix in ("-journal", "-wal", "-shm")]
+    before = snapshot_tree_metadata(guard.context.authorized_root)
+    try:
+        with connect(resolved, boundary_guard=guard) as conn:
+            apply_migrations(conn)
+    except Exception as exc:
+        reconcile_failed_mutation(
+            before=before,
+            root=guard.context.authorized_root,
+            allowed_changed_paths=map(str, [resolved, *sidecars]),
+            entrypoint="ph15_database.initialize_database",
+            cause=exc,
+        )
+        raise
+    after = snapshot_tree_metadata(guard.context.authorized_root)
+    reconcile_side_effects(before, after, map(str, [resolved, *sidecars]))
+    guard.verify_post_write(resolved)
 
 
 def apply_migrations(conn: sqlite3.Connection) -> None:
@@ -760,15 +834,44 @@ def integrity_report(db_path: Path) -> dict[str, object]:
         }
 
 
-def backup_database(db_path: Path, backup_path: Path) -> None:
+def backup_database(
+    db_path: Path,
+    backup_path: Path,
+    *,
+    boundary_guard: BoundaryGuard | None = None,
+) -> None:
+    guard = require_boundary_guard(boundary_guard, "ph15_database.backup_database")
     backup_path = Path(backup_path)
+    backup_path = guard.resolve(backup_path)
+    sidecars = [Path(f"{backup_path}{suffix}") for suffix in ("-journal", "-wal", "-shm")]
+    guard.authorize(
+        operation="overwrite" if backup_path.exists() else "create",
+        requested_target=backup_path,
+        resolved_physical_destination=backup_path,
+        indirect_outputs=sidecars,
+    )
+    _assert_write_platform(backup_path)
     backup_path.parent.mkdir(parents=True, exist_ok=True)
-    with connect(db_path, read_only=True) as source:
-        target = sqlite3.connect(backup_path)
-        try:
-            source.backup(target)
-        finally:
-            target.close()
+    before = snapshot_tree_metadata(guard.context.authorized_root)
+    try:
+        with connect(db_path, read_only=True) as source:
+            target = sqlite3.connect(backup_path)
+            try:
+                source.backup(target)
+            finally:
+                target.close()
+    except Exception as exc:
+        reconcile_failed_mutation(
+            before=before,
+            root=guard.context.authorized_root,
+            allowed_changed_paths=map(str, [backup_path, *sidecars]),
+            entrypoint="ph15_database.backup_database",
+            cause=exc,
+        )
+        raise
+    after = snapshot_tree_metadata(guard.context.authorized_root)
+    reconcile_side_effects(before, after, map(str, [backup_path, *sidecars]))
+    guard.verify_post_write(backup_path)
 
 
 def _reconcile_and_store(
@@ -896,12 +999,25 @@ def import_period(
     raw_eplaza: Optional[Path] = None,
     raw_impulsa: Optional[Path] = None,
     allow_hash_change: bool = False,
+    boundary_guard: BoundaryGuard | None = None,
 ) -> ImportResult:
     root = Path(root).resolve()
+    db_path = Path(db_path).resolve()
+    guard = require_boundary_guard(boundary_guard, "ph15_database.import_period")
+    guard.assert_authorized_root(root)
+    sidecars = [Path(f"{db_path}{suffix}") for suffix in ("-journal", "-wal", "-shm")]
+    operation = "overwrite" if db_path.exists() else "create"
+    guard.authorize(
+        operation=operation,
+        requested_target=db_path,
+        resolved_physical_destination=guard.resolve(db_path),
+        indirect_outputs=sidecars,
+    )
+    before = snapshot_tree_metadata(guard.context.authorized_root)
     raw_eplaza, raw_impulsa = _resolve_inputs(root, period, raw_eplaza, raw_impulsa)
     input_fingerprint = "|".join([sha256(raw_eplaza), sha256(raw_impulsa)])
 
-    with connect(db_path) as conn:
+    with connect(db_path, boundary_guard=guard) as conn:
         try:
             conn.execute("BEGIN")
             apply_migrations(conn)
@@ -963,9 +1079,20 @@ def import_period(
                 (reconciliation_status, "Import completed", run_id),
             )
             conn.commit()
-        except Exception:
+        except Exception as exc:
             conn.rollback()
+            reconcile_failed_mutation(
+                before=before,
+                root=guard.context.authorized_root,
+                allowed_changed_paths=map(str, [db_path, *sidecars]),
+                entrypoint="ph15_database.import_period",
+                cause=exc,
+            )
             raise
+
+    after = snapshot_tree_metadata(guard.context.authorized_root)
+    reconcile_side_effects(before, after, map(str, [db_path, *sidecars]))
+    guard.verify_post_write(db_path)
 
     return ImportResult(
         period=period,

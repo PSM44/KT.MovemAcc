@@ -2,6 +2,12 @@ import argparse
 import json
 from pathlib import Path
 from kt_movemacc.engine import run_ph1
+from kt_movemacc.root_boundary import BoundaryGuard, BoundaryViolation
+from kt_movemacc.trusted_authorization import (
+    AuthorizationVerificationError,
+    create_lab_review_guard,
+    verify_productive_grant_files,
+)
 
 
 def _standard_raw_paths(root: Path, period: str) -> tuple[Path, Path]:
@@ -14,6 +20,38 @@ def _standard_raw_paths(root: Path, period: str) -> tuple[Path, Path]:
     )
 
 
+def _load_mutation_guard(
+    authorization_file: str | None,
+    grant_file: str | None,
+    trust_config: str,
+    root: Path,
+) -> BoundaryGuard:
+    if authorization_file:
+        raise SystemExit(
+            "ROOT_BOUNDARY_DENIED: unsigned --authorization-file payloads cannot authorize financial mutations"
+        )
+    if not grant_file:
+        raise SystemExit("ROOT_BOUNDARY_DENIED: --grant-file is required for mutating commands")
+    try:
+        verified = verify_productive_grant_files(
+            grant_file=grant_file,
+            trust_config_file=trust_config,
+            expected_task="PRODUCTIVE_TASK_UNAVAILABLE",
+            expected_runtime="windows" if __import__("os").name == "nt" else "wsl2",
+        )
+        guard = verified.boundary_guard()
+        guard.assert_authorized_root(root)
+        return guard
+    except (
+        AuthorizationVerificationError,
+        BoundaryViolation,
+        OSError,
+        ValueError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise SystemExit(f"ROOT_BOUNDARY_DENIED: {exc}") from exc
+
+
 def main():
     parser = argparse.ArgumentParser(description="KT.MovemAcc CLI")
     subparsers = parser.add_subparsers(dest="command")
@@ -24,6 +62,14 @@ def main():
     ph1_parser.add_argument("--raw-eplaza", help="Explicit EPLAZA XLSB path.")
     ph1_parser.add_argument("--raw-impulsa", help="Explicit IMPULSA XLSB path.")
     ph1_parser.add_argument("--out-dir", help="Explicit output directory.")
+    ph1_parser.add_argument("--authorization-file", help="Deprecated unsigned payload; always denied for financial mutation.")
+    ph1_parser.add_argument("--grant-file", help="Productive signed grant envelope. Verification currently fails closed.")
+    ph1_parser.add_argument("--trust-config", default="04_CONFIG/SECURITY/KTMA_AUTHORIZATION_TRUST.json")
+    ph1_parser.add_argument(
+        "--lab-review",
+        action="store_true",
+        help="LAB_ONLY review under 90_RUNTIME/PH1_REVIEW/<period>/RUN_NNN; never productive publication.",
+    )
 
     ph15_parser = subparsers.add_parser("ph15-db", help="PH1.5 SQLite financial database foundation")
     ph15_parser.add_argument("--period", required=True, help="Period (e.g., 2026.08)")
@@ -33,6 +79,9 @@ def main():
     ph15_parser.add_argument("--raw-impulsa", help="Explicit IMPULSA XLSB path.")
     ph15_parser.add_argument("--allow-hash-change", action="store_true", help="Reserved for future versioning policy; current PH1.5 source policy is REJECT.")
     ph15_parser.add_argument("--print-lineage", action="store_true", help="Print Hernando de Aguirre lineage JSON after import.")
+    ph15_parser.add_argument("--authorization-file", help="Deprecated unsigned payload; always denied for financial mutation.")
+    ph15_parser.add_argument("--grant-file", help="Productive signed grant envelope. Verification currently fails closed.")
+    ph15_parser.add_argument("--trust-config", default="04_CONFIG/SECURITY/KTMA_AUTHORIZATION_TRUST.json")
 
     ph15_query = subparsers.add_parser("ph15-query", help="Read-only PH1.5 database query contract")
     ph15_query.add_argument("query", choices=["periods", "entities", "source-files", "runs", "account", "consolidated", "rule-versions", "discrepancies", "hernando"])
@@ -53,15 +102,30 @@ def main():
             impulsa = Path(args.raw_impulsa).resolve()
         out_dir = Path(args.out_dir).resolve() if args.out_dir else root / "OUTPUT" / args.period
 
+        if args.lab_review:
+            if not eplaza.exists() or not impulsa.exists():
+                raise SystemExit(f"Error: RAW inputs not found: {eplaza} | {impulsa}")
+            if args.authorization_file or args.grant_file:
+                raise SystemExit("ROOT_BOUNDARY_DENIED: --lab-review cannot be combined with authorization files")
+            if not args.out_dir:
+                raise SystemExit("ROOT_BOUNDARY_DENIED: --lab-review requires an explicit --out-dir")
+            try:
+                guard = create_lab_review_guard(root=root, out_dir=out_dir, period=args.period)
+                out_dir.mkdir(parents=True, exist_ok=False)
+            except (AuthorizationVerificationError, BoundaryViolation, OSError, ValueError) as exc:
+                raise SystemExit(f"ROOT_BOUNDARY_DENIED: {exc}") from exc
+        else:
+            guard = _load_mutation_guard(args.authorization_file, args.grant_file, args.trust_config, root)
         if not eplaza.exists() or not impulsa.exists():
             raise SystemExit(f"Error: RAW inputs not found: {eplaza} | {impulsa}")
 
-        run_ph1(eplaza, impulsa, out_dir, period=args.period)
+        run_ph1(eplaza, impulsa, out_dir, period=args.period, boundary_guard=guard)
     elif args.command == "ph15-db":
         from kt_movemacc.ph15_database import DEFAULT_DB_PATH, database_summary, import_period, lineage_for_hernando
 
         root = Path(args.root).resolve()
         db_path = Path(args.db_path).resolve() if args.db_path else root / DEFAULT_DB_PATH
+        guard = _load_mutation_guard(args.authorization_file, args.grant_file, args.trust_config, root)
         result = import_period(
             db_path,
             root=root,
@@ -69,6 +133,7 @@ def main():
             raw_eplaza=Path(args.raw_eplaza).resolve() if args.raw_eplaza else None,
             raw_impulsa=Path(args.raw_impulsa).resolve() if args.raw_impulsa else None,
             allow_hash_change=args.allow_hash_change,
+            boundary_guard=guard,
         )
         summary = database_summary(db_path)
         print("[PH1.5] SQLite import complete")

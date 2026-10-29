@@ -27,6 +27,14 @@ import pyxlsb
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from kt_movemacc.root_boundary import (
+    BoundaryGuard,
+    reconcile_failed_mutation,
+    reconcile_side_effects,
+    require_boundary_guard,
+    snapshot_tree_metadata,
+)
+
 SHEET_PATTERN = re.compile(r"CUENTAS DE MAYOR", re.IGNORECASE)
 ACCOUNT_CODE_RE = re.compile(r"^\d{5,8}$")
 NUMERIC_COLS = (5, 6, 7, 8, 9, 10)
@@ -97,6 +105,13 @@ class AuditEntry:
     key: str
     detail: str
     location: str
+    node_key: Optional[str] = None
+    audit_id: Optional[str] = None
+    observation_id: Optional[str] = None
+    period: Optional[str] = None
+    identity_status: str = "UNASSIGNED"
+    duplicate_ordinal: int = 1
+    duplicate_count: int = 1
 
 
 @dataclass
@@ -177,6 +192,82 @@ def _literal_excel_text(value):
     if isinstance(value, str) and value.startswith("="):
         return "'" + value
     return value
+
+
+def _audit_component(value: str, *, fallback: str) -> str:
+    component = re.sub(r"[^A-Z0-9]+", "_", _normalise(value)).strip("_")
+    return component[:48] or fallback
+
+
+def assign_audit_identities(
+    entries: list[AuditEntry],
+    period: str,
+    source_hashes: dict[str, str],
+) -> None:
+    """Assign permanent finding identity and deterministic occurrence identity.
+
+    ``AUDIT_ID`` excludes period, source hash, source row, worksheet location and
+    execution time. ``OBSERVATION_ID`` deliberately includes the period, source
+    fingerprint, observation content and an explicit duplicate ordinal.
+    """
+
+    identities_by_id: dict[str, tuple[str, str, str]] = {}
+    identity_groups: dict[tuple[str, str, str], list[AuditEntry]] = {}
+    for entry in entries:
+        stable_node = (entry.node_key or entry.key or "").strip()
+        if stable_node:
+            entry.identity_status = "STABLE_SEMANTIC_KEY"
+            identity = (entry.company, entry.finding, stable_node)
+            node_component = _audit_component(stable_node, fallback="NODE")
+        else:
+            entry.identity_status = "IDENTITY_ADJUDICATION_REQUIRED"
+            identity = (entry.company, entry.finding, f"UNRESOLVED:{entry.detail}")
+            node_component = "IDENTITY_ADJUDICATION_REQUIRED"
+
+        exact_material = json.dumps(identity, ensure_ascii=False, separators=(",", ":"))
+        identity_digest = hashlib.sha256(exact_material.encode("utf-8")).hexdigest()[:12].upper()
+        audit_id = ".".join(
+            (
+                "KTMA",
+                "PH1",
+                _audit_component(entry.company, fallback="UNKNOWN_ENTITY"),
+                _audit_component(entry.finding, fallback="UNKNOWN_FINDING"),
+                node_component,
+                identity_digest,
+            )
+        )
+        prior = identities_by_id.setdefault(audit_id, identity)
+        if prior != identity:
+            raise RuntimeError(f"AUDIT_ID_COLLISION: {audit_id}: {prior!r} != {identity!r}")
+        entry.audit_id = audit_id
+        entry.period = period
+        identity_groups.setdefault(identity, []).append(entry)
+
+    source_fingerprint = hashlib.sha256(
+        "|".join(sorted(source_hashes.values())).encode("ascii")
+    ).hexdigest()
+    observations_seen: dict[str, AuditEntry] = {}
+    for group in identity_groups.values():
+        for ordinal, entry in enumerate(group, start=1):
+            entry.duplicate_ordinal = ordinal
+            entry.duplicate_count = len(group)
+            observation_material = json.dumps(
+                (
+                    entry.audit_id,
+                    period,
+                    source_fingerprint,
+                    entry.location,
+                    entry.detail,
+                    ordinal,
+                ),
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+            digest = hashlib.sha256(observation_material.encode("utf-8")).hexdigest()[:20].upper()
+            entry.observation_id = f"KTMA.PH1.OBS.{_audit_component(period, fallback='PERIOD')}.{digest}"
+            if entry.observation_id in observations_seen:
+                raise RuntimeError(f"OBSERVATION_ID_COLLISION: {entry.observation_id}")
+            observations_seen[entry.observation_id] = entry
 
 
 def parse_xlsb(path: Path) -> list[AccountRow]:
@@ -391,12 +482,12 @@ def write_cm_sheet(wb, sheet_name: str, rows: list[AccountRow], company: str, au
             elif block and block.status == "DIRECT_DIFF":
                 unresolved += 1
                 detail = ", ".join(f"{k}={v:.4f}" for k, v in block.diffs.items() if abs(v) > (TOLERANCE_CLP if k.endswith("clp") else TOLERANCE_UF))
-                audit_entries.append(AuditEntry("WARN", company, "SOURCE_SUBTOTAL_DIFF", row.label, detail or "difference within display precision", f"{sheet_name}!A{excel_row}"))
+                audit_entries.append(AuditEntry("WARN", company, "SOURCE_SUBTOTAL_DIFF", row.label, detail or "difference within display precision", f"{sheet_name}!A{excel_row}", node_key=row.heading_key))
                 for cell in ws[excel_row]:
                     cell.fill = FILL_WARN
             elif not row.is_zero:
                 unresolved += 1
-                audit_entries.append(AuditEntry("WARN", company, "AMBIGUOUS_HIERARCHY", row.label, "No source-reconciled leaf membership inferred; source values preserved", f"{sheet_name}!A{excel_row}"))
+                audit_entries.append(AuditEntry("WARN", company, "AMBIGUOUS_HIERARCHY", row.label, "No source-reconciled leaf membership inferred; source values preserved", f"{sheet_name}!A{excel_row}", node_key=row.heading_key))
                 for cell in ws[excel_row]:
                     cell.fill = FILL_WARN
         elif row.is_zero:
@@ -410,7 +501,7 @@ def write_cm_sheet(wb, sheet_name: str, rows: list[AccountRow], company: str, au
         child_rows = [row_to_excel[i] for i in block.account_indexes]
         if not child_rows:
             unresolved += 1
-            audit_entries.append(AuditEntry("ERROR", company, "EMPTY_SUBTOTAL_MEMBERSHIP", row.label, "Formula block reconciled in memory but resolved to no worksheet rows; source values preserved", f"{sheet_name}!A{excel_row}"))
+            audit_entries.append(AuditEntry("ERROR", company, "EMPTY_SUBTOTAL_MEMBERSHIP", row.label, "Formula block reconciled in memory but resolved to no worksheet rows; source values preserved", f"{sheet_name}!A{excel_row}", node_key=row.heading_key))
             continue
         for col in NUMERIC_COLS:
             letter = get_column_letter(col)
@@ -418,7 +509,7 @@ def write_cm_sheet(wb, sheet_name: str, rows: list[AccountRow], company: str, au
             ws.cell(excel_row, col).value = f"=SUM({refs})"
             source_formulas += 1
         source_values = ", ".join(f"{field}={getattr(row, field):.4f}" for field in VALUE_FIELDS)
-        audit_entries.append(AuditEntry("INFO", company, "SUBTOTAL_FORMULA_RECONCILED", row.label, f"{block.status}; source row {row.source_row}; {len(child_rows)} account rows; preserved source evidence: {source_values}", f"{sheet_name}!E{excel_row}:J{excel_row}"))
+        audit_entries.append(AuditEntry("INFO", company, "SUBTOTAL_FORMULA_RECONCILED", row.label, f"{block.status}; source row {row.source_row}; {len(child_rows)} account rows; preserved source evidence: {source_values}", f"{sheet_name}!E{excel_row}:J{excel_row}", node_key=row.heading_key))
 
     _style_cm_sheet(ws)
     return {
@@ -671,7 +762,7 @@ def apply_approved_ph1_criteria(period: str, wb, rows_by_company: dict[str, list
         }
         matrix.append(entry)
         applied.append(entry)
-        audit_entries.append(AuditEntry("INFO" if status == "NUMERICALLY_VERIFIED" else "WARN", rule.company, f"PH1_CRITERION_{status}", rule.rule_id, f"{formula}; diff_uf={diff:.6f}", destination))
+        audit_entries.append(AuditEntry("INFO" if status == "NUMERICALLY_VERIFIED" else "WARN", rule.company, f"PH1_CRITERION_{status}", rule.rule_id, f"{formula}; diff_uf={diff:.6f}", destination, node_key=rule.rule_id))
 
     verified = sum(1 for entry in matrix if entry["STATUS"] == "NUMERICALLY_VERIFIED")
     return {
@@ -684,14 +775,93 @@ def apply_approved_ph1_criteria(period: str, wb, rows_by_company: dict[str, list
     }
 
 
+def crosslink_approved_hierarchy_warnings(
+    audit_entries: list[AuditEntry],
+    criteria_metrics: dict[str, object],
+) -> dict[str, object]:
+    """Crosslink retained hierarchy WARNs to approved PH1 criteria.
+
+    This produces report metadata only. It deliberately leaves the original
+    WARN entries, financial values, and workbook formulas unchanged. Source
+    subtotal differences are excluded because the approved criteria govern net
+    UF hierarchy, not source debit/credit turnover semantics.
+    """
+
+    criteria_by_rule = {
+        str(entry["RULE_ID"]): entry
+        for entry in criteria_metrics.get("matrix", [])
+        if isinstance(entry, dict) and entry.get("RULE_ID")
+    }
+    rules_by_target: dict[tuple[str, str], list[CriteriaRule]] = {}
+    for rule in APPROVED_PH1_RULES:
+        rules_by_target.setdefault((rule.company, rule.target.key), []).append(rule)
+
+    crosslinks: list[dict[str, object]] = []
+    unresolved: list[dict[str, object]] = []
+
+    for warning in audit_entries:
+        if warning.severity != "WARN" or warning.finding != "AMBIGUOUS_HIERARCHY":
+            continue
+        semantic_key = warning.node_key or warning.key
+        matches = rules_by_target.get((warning.company, semantic_key), [])
+        if len(matches) != 1:
+            unresolved.append({
+                "AUDIT_ID": warning.audit_id,
+                "COMPANY": warning.company,
+                "SEMANTIC_KEY": semantic_key,
+                "REASON": "approved criterion match count is not one",
+                "MATCHING_RULE_IDS": [rule.rule_id for rule in matches],
+            })
+            continue
+
+        rule = matches[0]
+        criterion = criteria_by_rule.get(rule.rule_id)
+        if criterion is None or criterion.get("STATUS") != "NUMERICALLY_VERIFIED":
+            unresolved.append({
+                "AUDIT_ID": warning.audit_id,
+                "COMPANY": warning.company,
+                "SEMANTIC_KEY": semantic_key,
+                "REASON": "approved criterion is missing or not numerically verified",
+                "MATCHING_RULE_IDS": [rule.rule_id],
+            })
+            continue
+
+        crosslinks.append({
+            "AUDIT_ID": warning.audit_id,
+            "OBSERVATION_ID": warning.observation_id,
+            "COMPANY": warning.company,
+            "SEMANTIC_KEY": semantic_key,
+            "RULE_ID": rule.rule_id,
+            "EXCEL_DESTINATION": criterion.get("EXCEL_DESTINATION"),
+            "EXCEL_FORMULA": criterion.get("EXCEL_FORMULA"),
+            "SOURCE_UF": criterion.get("SOURCE_UF"),
+            "PYTHON_CALCULATED_UF": criterion.get("PYTHON_CALCULATED_UF"),
+            "DIFFERENCE_UF": criterion.get("DIFFERENCE_UF"),
+            "DISPOSITION": "TECHNICALLY_RESOLVED_BY_APPROVED_CRITERION_WARN_RETAINED",
+            "FINANCIAL_VALUES_CHANGED": False,
+            "FINANCIAL_FORMULAS_CHANGED_BY_CROSSLINK": False,
+        })
+
+    return {
+        "crosslinks": crosslinks,
+        "unresolved": unresolved,
+        "crosslinked_count": len(crosslinks),
+        "unresolved_count": len(unresolved),
+        "source_subtotal_diff_policy": "RETAIN_WARN_NOT_COVERED_BY_NET_UF_CRITERION",
+    }
+
+
 def write_audit_sheet(wb, entries: list[AuditEntry]) -> None:
     ws = wb.create_sheet("AUDIT.PH1")
-    ws.append(["SEVERIDAD", "EMPRESA", "HALLAZGO", "CLAVE", "DETALLE", "UBICACION"])
+    ws.append(["AUDIT_ID", "OBSERVATION_ID", "PERIOD", "SEVERIDAD", "EMPRESA", "HALLAZGO", "CLAVE", "DETALLE", "UBICACION"])
     for cell in ws[1]:
         cell.fill = FILL_HEADER
         cell.font = FONT_HEADER
     for entry in entries:
         ws.append([
+            _literal_excel_text(entry.audit_id),
+            _literal_excel_text(entry.observation_id),
+            _literal_excel_text(entry.period),
             _literal_excel_text(entry.severity),
             _literal_excel_text(entry.company),
             _literal_excel_text(entry.finding),
@@ -703,8 +873,8 @@ def write_audit_sheet(wb, entries: list[AuditEntry]) -> None:
             for cell in ws[ws.max_row]:
                 cell.fill = FILL_WARN
     ws.freeze_panes = "A2"
-    ws.auto_filter.ref = f"A1:F{ws.max_row}"
-    for col, width in {"A": 12, "B": 12, "C": 30, "D": 28, "E": 80, "F": 28}.items():
+    ws.auto_filter.ref = f"A1:I{ws.max_row}"
+    for col, width in {"A": 92, "B": 44, "C": 12, "D": 12, "E": 12, "F": 30, "G": 28, "H": 80, "I": 28}.items():
         ws.column_dimensions[col].width = width
 
 
@@ -745,6 +915,13 @@ def write_workbook(period: str, ep_rows: list[AccountRow], im_rows: list[Account
     source_hashes = {str(raw_eplaza): _sha256(raw_eplaza), str(raw_impulsa): _sha256(raw_impulsa)}
     criteria_metrics = apply_approved_ph1_criteria(period, wb, {"EPLAZA": ep_rows, "IMPULSA": im_rows}, audit_entries)
     metrics["approved_criteria"] = criteria_metrics
+    assign_audit_identities(audit_entries, period, source_hashes)
+    hierarchy_crosslinks = crosslink_approved_hierarchy_warnings(audit_entries, criteria_metrics)
+    criteria_metrics["hierarchy_warn_crosswalk"] = hierarchy_crosslinks["crosslinks"]
+    criteria_metrics["hierarchy_warn_crosswalk_count"] = hierarchy_crosslinks["crosslinked_count"]
+    criteria_metrics["hierarchy_warn_crosswalk_unresolved"] = hierarchy_crosslinks["unresolved"]
+    criteria_metrics["hierarchy_warn_crosswalk_unresolved_count"] = hierarchy_crosslinks["unresolved_count"]
+    criteria_metrics["source_subtotal_diff_policy"] = hierarchy_crosslinks["source_subtotal_diff_policy"]
     write_audit_sheet(wb, audit_entries)
     write_control_sheet(wb, period, raw_eplaza, raw_impulsa, metrics, source_hashes)
     wb.calculation.fullCalcOnLoad = True
@@ -767,15 +944,36 @@ def _formula_integrity(path: Path) -> dict[str, object]:
     return {"xlsx_package": "PASS", "formula_cells_xml": formulas, "broken_refs_xml": broken_ref, "empty_sum_formulas_xml": empty_sum}
 
 
-def run_ph1(raw_eplaza, raw_impulsa, out_dir, period: str = "2026.08") -> Path:
+def run_ph1(
+    raw_eplaza,
+    raw_impulsa,
+    out_dir,
+    period: str = "2026.08",
+    *,
+    boundary_guard: BoundaryGuard | None = None,
+) -> Path:
     raw_eplaza = Path(raw_eplaza)
     raw_impulsa = Path(raw_impulsa)
     out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
+    guard = require_boundary_guard(boundary_guard, "engine.run_ph1")
+    out_dir = guard.resolve(out_dir)
     out_xlsx = out_dir / f"CAM{period}_CONSOL.ALIGN.xlsx"
     report_path = out_dir / "KTMA_PH1_REPORT.json"
-    evidence_path = Path("08_EVIDENCE/REPORTS/KTMA_TASK031_SPECIALIST_PH1_FINANCIAL_CONVERGENCE_REPORT.json")
+    evidence_path = out_dir / "KTMA_TASK031_SPECIALIST_PH1_FINANCIAL_CONVERGENCE_REPORT.json"
+
+    guard.assert_authorized_root(guard.context.authorized_root)
+    outputs = [out_xlsx, report_path, evidence_path]
+    resolved_outputs = [guard.resolve(output) for output in outputs]
+    for output in outputs:
+        operation = "overwrite" if output.exists() else "create"
+        guard.authorize(
+            operation=operation,
+            requested_target=output,
+            resolved_physical_destination=guard.resolve(output),
+        )
+
+    before = snapshot_tree_metadata(guard.context.authorized_root)
+    out_dir.mkdir(parents=True, exist_ok=True)
     evidence_path.parent.mkdir(parents=True, exist_ok=True)
 
     print(f"[1/6] Parsing EPLAZA XLSB at {raw_eplaza}")
@@ -792,43 +990,54 @@ def run_ph1(raw_eplaza, raw_impulsa, out_dir, period: str = "2026.08") -> Path:
 
     print("[4/6] Writing five-sheet PH1 workbook")
     wb, metrics, audit_entries = write_workbook(period, ep_rows, im_rows, aligned, raw_eplaza, raw_impulsa)
-    wb.save(out_xlsx)
-    package = _formula_integrity(out_xlsx)
-    output_hash = _sha256(out_xlsx)
+    try:
+        wb.save(out_xlsx)
+        package = _formula_integrity(out_xlsx)
+        output_hash = _sha256(out_xlsx)
 
-    unresolved = metrics["eplaza"]["unresolved_hierarchy"] + metrics["impulsa"]["unresolved_hierarchy"]
-    criteria = metrics.get("approved_criteria", {})
-    approved_criteria_verified = (
-        criteria.get("applied_count") == len(APPROVED_PH1_RULES)
-        and criteria.get("blocked_count") == 0
-        and criteria.get("numerically_verified_count") == len(APPROVED_PH1_RULES)
-    )
-    blocking_unresolved = 0 if approved_criteria_verified else unresolved
-    status = "PASS"
-    if package["broken_refs_xml"] or package["empty_sum_formulas_xml"] or any(entry.severity == "ERROR" for entry in audit_entries) or blocking_unresolved:
-        status = "PARTIAL"
+        unresolved = metrics["eplaza"]["unresolved_hierarchy"] + metrics["impulsa"]["unresolved_hierarchy"]
+        criteria = metrics.get("approved_criteria", {})
+        crosslinked_hierarchy = int(criteria.get("hierarchy_warn_crosswalk_count", 0))
+        blocking_unresolved = max(unresolved - crosslinked_hierarchy, 0)
+        status = "PASS"
+        if package["broken_refs_xml"] or package["empty_sum_formulas_xml"] or any(entry.severity == "ERROR" for entry in audit_entries) or blocking_unresolved:
+            status = "PARTIAL"
 
-    required_sheets = [f"CAM{period}_CONSOL.ALIGN", f"CM{period}_EPLAZA", f"CM{period}_IMPULSA", "AUDIT.PH1", "CONTROL"]
-    execution_platform = platform.system() or "Unknown"
-    report = {
-        "task_id": "KTMA_TASK031_SPECIALIST_PH1_FINANCIAL_CONVERGENCE",
-        "period": period,
-        "ph1_status": status,
-        "output_path": str(out_xlsx),
-        "output_hash_sha256": output_hash,
-        "required_sheets": required_sheets,
-        "metrics": metrics,
-        "audit_count": len(audit_entries),
-        "unresolved_hierarchy_count": unresolved,
-        "approved_criteria_resolved_hierarchy_count": unresolved if approved_criteria_verified else 0,
-        "blocking_unresolved_hierarchy_count": blocking_unresolved,
-        "formula_integrity": package,
-        "excel_desktop_validation": "NOT_TESTED",
-        "execution_platform": execution_platform,
-        "windows_execution": "PASS" if execution_platform == "Windows" else "NOT_TESTED_IN_THIS_RUN",
-    }
-    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    evidence_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        required_sheets = [f"CAM{period}_CONSOL.ALIGN", f"CM{period}_EPLAZA", f"CM{period}_IMPULSA", "AUDIT.PH1", "CONTROL"]
+        execution_platform = platform.system() or "Unknown"
+        report = {
+            "task_id": "KTMA_TASK031_SPECIALIST_PH1_FINANCIAL_CONVERGENCE",
+            "period": period,
+            "ph1_status": status,
+            "output_path": str(out_xlsx),
+            "output_hash_sha256": output_hash,
+            "required_sheets": required_sheets,
+            "metrics": metrics,
+            "audit_count": len(audit_entries),
+            "unresolved_hierarchy_count": unresolved,
+            "approved_criteria_resolved_hierarchy_count": crosslinked_hierarchy,
+            "blocking_unresolved_hierarchy_count": blocking_unresolved,
+            "formula_integrity": package,
+            "excel_desktop_validation": "NOT_TESTED",
+            "execution_platform": execution_platform,
+            "windows_execution": "PASS" if execution_platform == "Windows" else "NOT_TESTED_IN_THIS_RUN",
+        }
+        report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        evidence_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    except Exception as exc:
+        reconcile_failed_mutation(
+            before=before,
+            root=guard.context.authorized_root,
+            allowed_changed_paths=map(str, resolved_outputs),
+            entrypoint="engine.run_ph1",
+            cause=exc,
+        )
+        raise
+
+    after = snapshot_tree_metadata(guard.context.authorized_root)
+    reconcile_side_effects(before, after, map(str, resolved_outputs))
+    for output in outputs:
+        guard.verify_post_write(output)
 
     print("[5/6] Workbook/package validation")
     print(f"      Sheets: {', '.join(required_sheets)}")

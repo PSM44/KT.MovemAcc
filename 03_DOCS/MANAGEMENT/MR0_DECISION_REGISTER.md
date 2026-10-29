@@ -1,0 +1,11 @@
+# MR.0 — Registro de Decisiones
+
+| ID | Dominio | Estado actual | Evidencia | Riesgo | Impacto | Prioridad | Dependencias | Recomendación | HUMAN decide | Roadmap candidato |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| D-MR0-001 | Continuidad | PH1 y PH1.5 publicados y aceptados; desarrollo pausado. | HEAD `e948336...`; TASK046. | Continuar implementación sin handover formal. | Pérdida de control operativo. | P0 | Ninguna. | Ejecutar HO.1 como siguiente DAG de documentación/operación. | Aprobar HO.1. | Sí |
+| D-MR0-002 | Publicación | Repositorio remoto sincronizado; archivos privados excluidos. | `origin/main` = `e948336...`; TASK046. | Nueva publicación accidental sin allowlist. | Exposición de datos. | P0 | Gates Git. | Mantener autorización explícita para cada commit/push. | Confirmar política. | Sí |
+| D-MR0-003 | Fuente RAW | Política `REJECT` vigente. | Código y docs PH1.5. | No hay flujo para fuente corregida. | Bloqueo ante corrección legítima. | P1 | Análisis contable. | Diseñar `NEW_VERSION` en roadmap, no implementarlo aún. | Elegir política objetivo. | Sí |
+| D-MR0-004 | PH2 | Contrato read-only existe; implementación no autorizada. | `PH15_TO_PH2_READ_CONTRACT.md`. | Saltar a implementación sin definición de Funding Memo. | Rehacer trabajo o errores financieros. | P1 | Definición producto. | Preparar diseño PH2 separado con criterios de aceptación. | Aprobar fase de diseño. | Sí |
+| D-MR0-005 | README | README no refleja plenamente publicación completada. | `README.md`. | Confusión comunicacional. | Bajo/medio. | P2 | Autorización documental. | Actualizar en tarea documental controlada. | Sí/No. | Sí |
+| D-MR0-006 | Herramientas | SQLite suficiente; dbt/GE/Power BI/Airflow no necesarios ahora. | Escala actual: dos RAW, flujo local mensual. | Sobrecarga tecnológica. | Complejidad innecesaria. | P2 | Roadmap PH2. | Adoptar SQLite ahora; evaluar dbt/Great Expectations; Power BI luego; rechazar Airflow por alcance actual. | Validar dirección. | Sí |
+| D-MR0-007 | Windows | Documentado, no verificado ahora. | `UseCase_PH15.md`; MR.0. | Instrucciones pueden requerir ajuste. | Fricción de usuario. | P1 | Ambiente Windows. | Incluir verificación Windows en HO.1. | Confirmar obligatoriedad. | Sí |

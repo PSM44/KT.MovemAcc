@@ -7,16 +7,17 @@ from pathlib import Path
 import pytest
 
 from kt_movemacc import ph15_database as db
+from kt_movemacc.root_boundary import BoundaryViolation
+from ktma_guarded_financial_fixtures import ROOT, database_guard, database_path
 
-ROOT = Path.cwd()
 PERIOD = "2026.08"
 RAW_EPLAZA = ROOT / "RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb"
 RAW_IMPULSA = ROOT / "RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb"
 
 
-def test_schema_initialization_and_foreign_keys(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.initialize_database(db_path)
+def test_schema_initialization_and_foreign_keys():
+    db_path = database_path("schema")
+    db.initialize_database(db_path, boundary_guard=database_guard(db_path))
     with db.connect(db_path, read_only=True) as conn:
         assert conn.execute("SELECT MAX(version) FROM schema_migrations").fetchone()[0] == db.SCHEMA_VERSION
         assert conn.execute("PRAGMA foreign_keys").fetchone()[0] == 1
@@ -29,10 +30,11 @@ def test_schema_initialization_and_foreign_keys(tmp_path):
     assert {"source_files", "original_source_rows", "account_observations", "calculation_lineage"} <= tables
 
 
-def test_august_ingestion_idempotency_persistence_and_reconciliation(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    first = db.import_period(db_path, root=ROOT, period=PERIOD)
-    second = db.import_period(db_path, root=ROOT, period=PERIOD)
+def test_august_ingestion_idempotency_persistence_and_reconciliation():
+    db_path = database_path("idempotency")
+    guard = database_guard(db_path)
+    first = db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=guard)
+    second = db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=guard)
     summary = db.database_summary(db_path)
 
     assert first.reconciliation_status == "PASS"
@@ -58,15 +60,23 @@ def test_decimal_precision_is_canonical_text():
     assert Decimal(db.decimal_text(0.1 + 0.2)) == Decimal("0.300000")
 
 
-def test_transaction_rollback_on_failure(tmp_path, monkeypatch):
-    db_path = tmp_path / "KTMA.sqlite"
+def test_transaction_rollback_on_failure(monkeypatch):
+    db_path = database_path("rollback")
 
     def fail_consolidated(*args, **kwargs):
         raise RuntimeError("controlled rollback probe")
 
     monkeypatch.setattr(db, "_insert_consolidated", fail_consolidated)
-    with pytest.raises(RuntimeError, match="controlled rollback probe"):
-        db.import_period(db_path, root=ROOT, period=PERIOD)
+    with pytest.raises(BoundaryViolation) as caught:
+        db.import_period(
+            db_path,
+            root=ROOT,
+            period=PERIOD,
+            boundary_guard=database_guard(db_path),
+        )
+    assert caught.value.decision.code == "INCOMPLETE_MUTATION_EFFECT_DETECTED"
+    assert isinstance(caught.value.__cause__, RuntimeError)
+    assert str(caught.value.__cause__) == "controlled rollback probe"
 
     with db.connect(db_path, read_only=True) as conn:
         assert conn.execute("SELECT COUNT(*) FROM source_files").fetchone()[0] == 0
@@ -74,10 +84,11 @@ def test_transaction_rollback_on_failure(tmp_path, monkeypatch):
         assert conn.execute("SELECT COUNT(*) FROM processing_runs").fetchone()[0] == 0
 
 
-def test_source_hash_change_is_rejected_after_prior_import(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.import_period(db_path, root=ROOT, period=PERIOD)
-    with db.connect(db_path) as conn:
+def test_source_hash_change_is_rejected_after_prior_import():
+    db_path = database_path("source_hash_change")
+    guard = database_guard(db_path)
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=guard)
+    with db.connect(db_path, boundary_guard=guard) as conn:
         period_id = conn.execute("SELECT period_id FROM accounting_periods WHERE period_code = ?", (PERIOD,)).fetchone()[0]
         entity_id = conn.execute("SELECT entity_id FROM entities WHERE entity_code = 'EPLAZA'").fetchone()[0]
         with pytest.raises(ValueError, match="Source hash changed"):
@@ -98,17 +109,25 @@ def test_source_hash_change_is_rejected_after_prior_import(tmp_path):
             )
 
 
-def test_missing_and_ambiguous_inputs_are_explicit(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
+def test_missing_and_ambiguous_inputs_are_explicit():
+    db_path = database_path("missing_inputs")
+    guard = database_guard(db_path)
     with pytest.raises(FileNotFoundError):
-        db.import_period(db_path, root=ROOT, period="2099.01")
+        db.import_period(db_path, root=ROOT, period="2099.01", boundary_guard=guard)
     with pytest.raises(ValueError, match="same file"):
-        db.import_period(db_path, root=ROOT, period=PERIOD, raw_eplaza=RAW_EPLAZA, raw_impulsa=RAW_EPLAZA)
+        db.import_period(
+            db_path,
+            root=ROOT,
+            period=PERIOD,
+            raw_eplaza=RAW_EPLAZA,
+            raw_impulsa=RAW_EPLAZA,
+            boundary_guard=guard,
+        )
 
 
-def test_repeated_titles_and_hierarchy_edges_are_queryable(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.import_period(db_path, root=ROOT, period=PERIOD)
+def test_repeated_titles_and_hierarchy_edges_are_queryable():
+    db_path = database_path("repeated_titles")
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=database_guard(db_path))
     with db.connect(db_path, read_only=True) as conn:
         repeated = conn.execute(
             """
@@ -124,19 +143,21 @@ def test_repeated_titles_and_hierarchy_edges_are_queryable(tmp_path):
     assert edges > 0
 
 
-def test_multiple_periods_with_explicit_inputs(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.import_period(db_path, root=ROOT, period="2026.08", raw_eplaza=RAW_EPLAZA, raw_impulsa=RAW_IMPULSA)
-    db.import_period(db_path, root=ROOT, period="2026.09", raw_eplaza=RAW_EPLAZA, raw_impulsa=RAW_IMPULSA)
+def test_multiple_periods_with_explicit_inputs():
+    db_path = database_path("multiple_periods")
+    guard = database_guard(db_path)
+    db.import_period(db_path, root=ROOT, period="2026.08", raw_eplaza=RAW_EPLAZA, raw_impulsa=RAW_IMPULSA, boundary_guard=guard)
+    db.import_period(db_path, root=ROOT, period="2026.09", raw_eplaza=RAW_EPLAZA, raw_impulsa=RAW_IMPULSA, boundary_guard=guard)
     with db.connect(db_path, read_only=True) as conn:
         assert conn.execute("SELECT COUNT(*) FROM accounting_periods").fetchone()[0] == 2
         assert conn.execute("SELECT COUNT(*) FROM source_files").fetchone()[0] == 4
 
 
-def test_foreign_key_integrity_and_read_only_reopen(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.import_period(db_path, root=ROOT, period=PERIOD)
-    with db.connect(db_path) as conn:
+def test_foreign_key_integrity_and_read_only_reopen():
+    db_path = database_path("foreign_keys")
+    guard = database_guard(db_path)
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=guard)
+    with db.connect(db_path, boundary_guard=guard) as conn:
         with pytest.raises(sqlite3.IntegrityError):
             conn.execute(
                 """
@@ -151,9 +172,9 @@ def test_foreign_key_integrity_and_read_only_reopen(tmp_path):
         assert conn.execute("SELECT COUNT(*) FROM account_observations").fetchone()[0] == 429
 
 
-def test_independent_financial_matrices_and_read_contract(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    db.import_period(db_path, root=ROOT, period=PERIOD)
+def test_independent_financial_matrices_and_read_contract():
+    db_path = database_path("financial_matrices")
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=database_guard(db_path))
 
     rules = db.independent_rule_matrix(db_path, PERIOD)
     headings = db.independent_cam_heading_matrix(db_path, PERIOD)
@@ -177,17 +198,17 @@ def test_independent_financial_matrices_and_read_contract(tmp_path):
     assert consolidated[0]["total_value_uf"] == "550120.960000"
 
 
-def test_integrity_check_backup_restore_and_lock_behavior(tmp_path):
-    db_path = tmp_path / "KTMA.sqlite"
-    backup_path = tmp_path / "backup.sqlite"
-    db.import_period(db_path, root=ROOT, period=PERIOD)
+def test_integrity_check_backup_restore_and_lock_behavior():
+    db_path = database_path("integrity")
+    backup_path = db_path.parent / "backup.sqlite"
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=database_guard(db_path))
 
     integrity = db.integrity_report(db_path)
     assert integrity["integrity_check"] == "ok"
     assert integrity["quick_check"] == "ok"
     assert integrity["foreign_key_check"] == []
 
-    db.backup_database(db_path, backup_path)
+    db.backup_database(db_path, backup_path, boundary_guard=database_guard(backup_path))
     assert db.database_summary(backup_path)["observations"] == 429
 
     locker = sqlite3.connect(db_path)
@@ -204,8 +225,9 @@ def test_integrity_check_backup_restore_and_lock_behavior(tmp_path):
         locker.close()
 
 
-def test_source_xlsb_hashes_are_not_modified(tmp_path):
+def test_source_xlsb_hashes_are_not_modified():
     before = {RAW_EPLAZA: db.sha256(RAW_EPLAZA), RAW_IMPULSA: db.sha256(RAW_IMPULSA)}
-    db.import_period(tmp_path / "KTMA.sqlite", root=ROOT, period=PERIOD)
+    db_path = database_path("source_hashes")
+    db.import_period(db_path, root=ROOT, period=PERIOD, boundary_guard=database_guard(db_path))
     after = {RAW_EPLAZA: db.sha256(RAW_EPLAZA), RAW_IMPULSA: db.sha256(RAW_IMPULSA)}
     assert after == before

@@ -16,14 +16,25 @@ from pathlib import Path
 import openpyxl
 
 from kt_movemacc import engine
+from ktma_guarded_financial_fixtures import (
+    ROOT,
+    RUN_ROOT,
+    ensure_run_layout,
+    ph1_guard,
+)
 
-ROOT = Path.cwd()
+class ProtectedPathError(PermissionError):
+    pass
+
 PERIOD = "2026.08"
 RAW_EPLAZA = ROOT / "RAW.INPUT/2026.08/Mayor Inmob. Eplaza 2026 08 V 1.xlsb"
 RAW_IMPULSA = ROOT / "RAW.INPUT/2026.08/Mayor Grupo Impulsa 2026 08 V 1.xlsb"
-OUT_DIR = ROOT / "OUTPUT/2026.08"
+
+OUT_DIR = RUN_ROOT / "ph1"
 OUT_XLSX = OUT_DIR / "CAM2026.08_CONSOL.ALIGN.xlsx"
 REPORT_PATH = OUT_DIR / "KTMA_PH1_REPORT.json"
+EVIDENCE_PATH = OUT_DIR / "KTMA_TASK031_SPECIALIST_PH1_FINANCIAL_CONVERGENCE_REPORT.json"
+
 EXPECTED_SHEETS = [
     "CAM2026.08_CONSOL.ALIGN",
     "CM2026.08_EPLAZA",
@@ -38,7 +49,23 @@ def sha256(path: Path) -> str:
 
 
 def ensure_output() -> None:
-    engine.run_ph1(RAW_EPLAZA, RAW_IMPULSA, OUT_DIR, period=PERIOD)
+    ensure_run_layout()
+    canonical_output = (ROOT / "OUTPUT/2026.08").resolve()
+    resolved_out = OUT_DIR.resolve()
+    if canonical_output in resolved_out.parents or canonical_output == resolved_out:
+        raise ProtectedPathError(f"Unauthorized write to protected canonical path: {resolved_out}")
+    outputs = (OUT_XLSX, REPORT_PATH, EVIDENCE_PATH)
+    if all(path.is_file() for path in outputs):
+        return
+    if any(path.exists() for path in outputs):
+        raise RuntimeError(f"Partial TASK070 PH1 fixture output; refusing overwrite: {OUT_DIR}")
+    engine.run_ph1(
+        RAW_EPLAZA,
+        RAW_IMPULSA,
+        OUT_DIR,
+        period=PERIOD,
+        boundary_guard=ph1_guard(),
+    )
 
 
 def load_wb():
@@ -188,7 +215,9 @@ def test_zero_total_uf_nonzero_clp_or_other_indicators_remain_visible():
 def test_audit_records_description_conflicts_and_hierarchy_exceptions():
     wb = load_wb()
     ws = wb["AUDIT.PH1"]
-    findings = [row[2] for row in ws.iter_rows(min_row=2, values_only=True)]
+    header = [cell.value for cell in ws[1]]
+    finding_column = header.index("HALLAZGO")
+    findings = [row[finding_column] for row in ws.iter_rows(min_row=2, values_only=True)]
     assert "CONFLICTING_DESCRIPTION" in findings
     assert "SUBTOTAL_FORMULA_RECONCILED" in findings
     assert "AMBIGUOUS_HIERARCHY" in findings

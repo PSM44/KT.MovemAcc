@@ -53,19 +53,17 @@ Para ver el ejemplo de trazabilidad:
 .\90_RUNTIME\venv_win\Scripts\python.exe -m kt_movemacc ph15-db --period 2026.08 --print-lineage
 ```
 
-## Como Ejecutar En WSL
+## Como Consultar En WSL
 
-Desde la raiz del proyecto:
+WSL2 es consumidor de solo lectura. No ejecute `ph15-db` contra `DATA/KTMA.sqlite` desde Linux; delegue toda importacion o migracion canonica al runtime Windows.
 
-```bash
-PYTHONPATH=src 90_RUNTIME/venv_clean/bin/python -m kt_movemacc ph15-db --period 2026.08
-```
-
-O:
+Desde la raiz del proyecto, use el contrato de consulta:
 
 ```bash
-PYTHONPATH=src 90_RUNTIME/venv_clean/bin/kt_movemacc ph15-db --period 2026.08
+PYTHONPATH=src 90_RUNTIME/venv_clean/bin/python -m kt_movemacc ph15-query periods
 ```
+
+Para una escritura controlada, invoque el Python Windows desde PowerShell o solicite al operador Windows ejecutar `ph15-db`. El guard de plataforma rechaza una escritura canonica desde WSL/Linux antes de crear o migrar la base. Bases desechables fuera de la ruta canonica siguen permitidas para pruebas aisladas.
 
 ## Que Hace La Importacion
 
@@ -115,6 +113,8 @@ La trazabilidad muestra:
 - La validacion Excel Desktop pertenece al flujo PH1; PH1.5 guarda evidencia Python/SQL.
 - La revision visual y de usabilidad humana sigue siendo una compuerta separada.
 - La consulta ordinaria debe hacerse con `ph15-query`; SQL libre queda reservado para revision tecnica controlada.
+- Windows es el unico escritor autorizado de `DATA/KTMA.sqlite`; WSL2 solo consulta en modo read-only.
+- El workbook PH1 aceptado se identifica mediante evidencia privada (ruta, hash y estructura), no por el blob historico de `HEAD` por si solo.
 
 ## Consultas De Solo Lectura
 

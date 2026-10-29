@@ -4,6 +4,8 @@
 
 PH1.5 introduces a local SQLite database between RAW XLSB ingestion and later reporting. The accepted PH1 workbook generator remains the default reporting path; the database is invoked explicitly with `ph15-db`.
 
+The canonical database has one authorized writer: Windows. WSL2 may query it read-only or delegate `ph15-db` to Windows. The connection boundary rejects canonical writes and migrations from Linux/WSL before opening the database for write; isolated disposable databases outside the canonical path remain available for tests.
+
 The database stores financial source rows, normalized observations, hierarchy context, approved PH1 rule lineage, consolidated balances, and reconciliation checks. It is intended for inspection, traceability, and future reporting integration, not as a replacement for the HUMAN-accepted PH1 workbook.
 
 ## Storage
