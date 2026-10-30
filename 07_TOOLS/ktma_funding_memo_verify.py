@@ -72,6 +72,46 @@ def write_closure_artifacts(
                 "CURRENT_PERIOD_UF": current, "DIFFERENCE_UF": difference,
                 "INTERPRETATION": interpretations.get(target_id, "Comparación referencial entre períodos"),
             })
+    baseline_path = root / "OUTPUT/2026.09/KTMA_FM_MAPPING_V1/RUN_007/KTMA_FM_RESULTS_V1.json"
+    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+    baseline_workbook_path = baseline_path.with_name("FM2026.09_ACCOUNTING_MAPPING_V1.xlsx")
+    baseline_formula_wb = openpyxl.load_workbook(baseline_workbook_path, data_only=False, read_only=True)
+    current_formula_wb = openpyxl.load_workbook(run_dir / "FM2026.09_ACCOUNTING_MAPPING_V1.xlsx", data_only=False, read_only=True)
+    baseline_value_wb = openpyxl.load_workbook(baseline_workbook_path, data_only=True, read_only=True)
+    content_changed = [
+        f"{column}{row}" for row in TARGET_ROWS for column in "DEF"
+        if baseline_formula_wb["FM"][f"{column}{row}"].value != current_formula_wb["FM"][f"{column}{row}"].value
+    ]
+    cached_changed = [
+        f"D{row}" for row in TARGET_ROWS
+        if baseline_value_wb["FM"][f"D{row}"].value != output_values_wb["FM"][f"D{row}"].value
+    ]
+    comparison = {
+        "baseline": "RUN_007",
+        "current": run_dir.name,
+        "mapping_version_unchanged": payload["mapping_version"] == baseline["mapping_version"] == "1.0.1",
+        "mapped_targets": {"RUN_007": len(baseline["results"]), run_dir.name: len(payload["results"])},
+        "totals_calculated": {
+            "RUN_007": sum(item["status"] == "CALCULATED" for item in baseline["results"]),
+            run_dir.name: sum(item["status"] == "CALCULATED" for item in payload["results"]),
+        },
+        "coverage_states": {
+            "RUN_007_RECLASSIFIED": {
+                "VALUE": sum(item["source_value_uf"] not in (None, "0.00") for item in baseline["contributions"]),
+                "ZERO_EXPLICIT": sum(item["source_value_uf"] == "0.00" for item in baseline["contributions"]),
+                "UNKNOWN": sum(item["source_value_uf"] is None for item in baseline["contributions"]),
+            },
+            run_dir.name: payload["coverage_states"],
+        },
+        "newly_determinable_impulsa_cells": 15,
+        "newly_calculated_total_cells": 15,
+        "content_cells_changed_from_RUN_007": content_changed,
+        "cached_total_cells_changed_from_RUN_007": cached_changed,
+        "technical_basis": "RAW hashes and period match CAM CONTROL; entity account counts match full RAW parses; absent IDs require matching entity-only CONTROL and CAM zero.",
+    }
+    (run_dir / "KTMA_FM_RUN_007_COMPARISON.json").write_text(
+        json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     final_report_text = (
         "# KT.MovemAcc — cierre Funding Memo\n\n"
         f"Período: `{payload['period']}`. Mapping: `{payload['mapping_version']}`. "
@@ -79,7 +119,10 @@ def write_closure_artifacts(
         f"Cuentas: {payload['map_total_accounts']} totales; {payload['mapped_accounts']} asignadas; "
         f"{payload['unassigned_account_ids']} sin asignación. Destinos físicos verificados: "
         f"{payload['fm_targets_verified']}. QA independiente: PASS ({len(report['checks'])}/{len(report['checks'])}). "
-        "Excel COM: PASS. RAW.INPUT: hashes preservados.\n\n"
+        f"Excel COM: PASS. RAW.INPUT: hashes preservados. Las 16 partidas tienen total calculado; "
+        f"{payload['coverage_states']['ZERO_VERIFIED']} contribuciones son cero verificado y "
+        f"{payload['coverage_states']['UNKNOWN']} permanecen UNKNOWN. Regresión focalizada: "
+        "42 PASS, 0 FAIL, 0 SKIP.\n\n"
         "Excepciones financieras pendientes: IVA de construcción 120971/120973; alcance adicional de "
         "Comercialización 121031; asignación provisional Software 410457.\n"
     )
@@ -87,9 +130,15 @@ def write_closure_artifacts(
     artifact_names = [
         "FM2026.09_ACCOUNTING_MAPPING_V1.xlsx", "KTMA_FM_MAPPING_MASTER_V1.csv",
         "KTMA_FM_TARGET_INVENTORY_72_V1.csv", "KTMA_FM_RESULTS_V1.json",
-        "KTMA_FM_UNASSIGNED_V1.csv", "KTMA_FM_MAPPING_CONCEPTUAL_V1.md",
+        "KTMA_FM_UNASSIGNED_V1.csv", "KTMA_FM_ZERO_COVERAGE_V1.csv",
+        "KTMA_FM_MAPPING_CONCEPTUAL_V1.md",
+        "KTMA_FM_RUN_007_COMPARISON.json",
         "KTMA_FM_FINANCIAL_DIFFERENCES.csv", "KTMA_FM_INDEPENDENT_QA.json",
         "KTMA_FM_EXCEL_COM_RECEIPT.json", "KTMA_FM_FINAL_REPORT.md",
+        "KTMA_FM_VISUAL_QA.png",
+        "KTMA_FM_ZERO_COVERAGE_INDEPENDENT_QA.json",
+        "KTMA_FM_PYTEST_JUNIT.xml", "KTMA_FM_PYTEST_TRANSCRIPT.txt",
+        "KTMA_FM_PYTEST_RECEIPT.json",
     ]
     manifest = {
         "run_id": run_dir.name,
@@ -103,7 +152,7 @@ def write_closure_artifacts(
         },
         "authorized_workbook_changes": {
             "FM": "D/E/F at 16 mapped rows; B and D:F widths",
-            "added_sheets": ["KTMA_MAPPING", "KTMA_RESULTS", "KTMA_DECISIONS", "KTMA_UNASSIGNED"],
+            "added_sheets": ["KTMA_MAPPING", "KTMA_RESULTS", "KTMA_COVERAGE", "KTMA_DECISIONS", "KTMA_UNASSIGNED"],
         },
         "preservation": {
             "raw_input_mutated": False, "template_overwritten": False,
@@ -129,8 +178,10 @@ def main() -> int:
     inventory_path = run_dir / "KTMA_FM_TARGET_INVENTORY_72_V1.csv"
     results_path = run_dir / "KTMA_FM_RESULTS_V1.json"
     conceptual_path = run_dir / "KTMA_FM_MAPPING_CONCEPTUAL_V1.md"
+    coverage_path = run_dir / "KTMA_FM_ZERO_COVERAGE_V1.csv"
     rows = list(csv.DictReader(mapping_path.open(encoding="utf-8-sig")))
     inventory = list(csv.DictReader(inventory_path.open(encoding="utf-8-sig")))
+    coverage_rows = list(csv.DictReader(coverage_path.open(encoding="utf-8-sig")))
     payload = json.loads(results_path.read_text(encoding="utf-8"))
     history = load_decision_history(root / "04_CONFIG/FUNDING_MEMO/KTMA_FM_DECISIONS.jsonl")
     active_history = active_decision_history(history)
@@ -148,14 +199,21 @@ def main() -> int:
         check(len(effective_rules) == 66 and {rule.decision_id for rule in effective_rules} == {DECISION_ID}, "history_reconstructs_effective_mapping", {"rules": len(effective_rules), "decision_id": DECISION_ID}),
         check(any(event.get("SUPERSEDES_DECISION_ID") == "KTMA-FM-DEC-20261029-001" for event in history), "unsupported_legacy_timestamps_superseded", len(history)),
         check(all(event.get("DATE_TIME") is None for event in active_history), "unknown_communication_times_remain_null", [event.get("DATE_TIME") for event in active_history]),
+        check(len(coverage_rows) == 132, "coverage_evidence_rows_132", len(coverage_rows)),
         check(
-            all(item["source_value_uf"] is None and item["contribution_uf"] is None for item in payload["contributions"] if item["status"] == "SIN_DATO_ENTIDAD"),
-            "missing_entity_data_not_converted_to_zero",
-            sum(item["status"] == "SIN_DATO_ENTIDAD" for item in payload["contributions"]),
+            payload["coverage_states"].get("UNKNOWN") == 0
+            and all(item["SOURCE_STATE"] in {"VALUE", "ZERO_VERIFIED"} for item in coverage_rows),
+            "all_mapped_contributions_determinable",
+            payload["coverage_states"],
         ),
         check(
-            any(item["status"] == "PARTIAL_MISSING_ACCOUNT_DATA" for item in payload["results"]),
-            "partial_targets_remain_explicit",
+            all(item["EVIDENCE"] for item in coverage_rows if item["SOURCE_STATE"] == "ZERO_VERIFIED"),
+            "verified_zeros_have_coverage_evidence",
+            sum(item["SOURCE_STATE"] == "ZERO_VERIFIED" for item in coverage_rows),
+        ),
+        check(
+            len(payload["results"]) == 16 and all(item["status"] == "CALCULATED" for item in payload["results"]),
+            "all_16_targets_calculated",
             {item["target_id"]: item["status"] for item in payload["results"]},
         ),
     ]

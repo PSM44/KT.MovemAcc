@@ -8,14 +8,16 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import uuid
 
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOL = ROOT / "07_TOOLS" / "ktma_root_guard.py"
-LAB = ROOT / "08_EVIDENCE" / "TASK067_ROOT_AUTHORITY_LAB" / "TASK066_REGRESSION_RUN_002"
+RUN_TOKEN = f"PYTEST_{os.getpid()}_{uuid.uuid4().hex[:8]}"
+LAB = ROOT / "90_RUNTIME" / "TASK066_ROOT_BOUNDARY" / RUN_TOKEN
 AUTHORIZED = LAB / "authorized_project"
 EXTERNAL = LAB / "external_protected_project"
-EVIDENCE = ROOT / "08_EVIDENCE" / "REPORTS" / "KTMA_TASK067_TASK066_REGRESSION_RUN_002.jsonl"
+EVIDENCE = LAB / "KTMA_TASK066_ROOT_BOUNDARY.jsonl"
 
 
 def _wsl(path: Path) -> str:

@@ -51,9 +51,32 @@ preservan los períodos anteriores. Las instrucciones atribuidas a gerencia o Di
 deben usar `MANAGEMENT_REPORTED_BY_HUMAN` o `BOARD_REPORTED_BY_HUMAN` y
 `REPORTED_BY=HUMAN`.
 
+## Cobertura contable y semántica de cero
+
+La versión de reglas permanece `1.0.1`. La clasificación mensual no modifica el mapping:
+
+- `VALUE`: el ID existe en el mayor RAW de la entidad y `VALORES UF` es distinto de cero.
+- `ZERO_VERIFIED`: el ID existe con valor cero, o su ausencia queda probada por cobertura
+  completa. Esta segunda vía exige simultáneamente período y hash RAW coincidentes con
+  `CONTROL`, conteo de cuentas RAW conciliado, ausencia exacta del ID, `CONTROL` de la fila
+  igual a `EPLAZA_ONLY` o `IMPULSA_ONLY`, y valor CAM igual a cero.
+- `UNKNOWN`: falta cualquiera de esas pruebas. No se convierte en cero y bloquea el total.
+
+Cada ejecución genera `KTMA_FM_ZERO_COVERAGE_V1.csv` y la hoja `KTMA_COVERAGE` con la
+evidencia por cuenta, entidad y partida. El total horizontal solo se calcula cuando todas
+las contribuciones de ambas entidades son `VALUE` o `ZERO_VERIFIED`.
+
 Prueba focalizada reproducible:
 
 ```powershell
 $env:PYTHONPATH = 'src;90_RUNTIME\venv_win\Lib\site-packages'
 py -3.11 -m pytest -q -p no:cacheprovider 06_TESTS/test_funding_memo.py
+```
+
+Contraste independiente de cobertura y ceros contra RAW/CAM:
+
+```powershell
+$env:PYTHONPATH = 'src;90_RUNTIME\venv_win\Lib\site-packages'
+& '90_RUNTIME\venv_win\Scripts\python.exe' -B '07_TOOLS\ktma_funding_memo_zero_verify.py' `
+  --root . --run-dir 'OUTPUT\2026.09\KTMA_FM_MAPPING_V1\RUN_NNN'
 ```

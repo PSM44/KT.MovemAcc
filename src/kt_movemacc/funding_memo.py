@@ -67,6 +67,8 @@ class AccountValue:
     source_sheet: str
     source_row: int
     source_sha256: str
+    value_state: str = "VALUE"
+    evidence: str = ""
 
 
 @dataclass(frozen=True)
@@ -78,6 +80,8 @@ class Contribution:
     coefficient: int
     contribution_uf: Decimal | None
     status: str
+    source_state: str
+    evidence: str
 
 
 @dataclass(frozen=True)
@@ -392,19 +396,25 @@ def load_entity_values(path: Path, entity: str) -> dict[str, AccountValue]:
     for row in parse_xlsb(path):
         if not row.code:
             continue
+        value = Decimal(str(row.bal_uf)).quantize(UF_SCALE)
         result[row.code] = AccountValue(
             entity=entity,
             account_id=row.code,
             description=row.description or row.heading or "",
-            value_uf=Decimal(str(row.bal_uf)),
+            value_uf=value,
             source_sheet=row.source_sheet,
             source_row=row.source_row,
             source_sha256=source_hash,
+            value_state="ZERO_VERIFIED" if value == 0 else "VALUE",
+            evidence=f"RAW_ACCOUNT_PRESENT:{path.name}:{row.source_sheet}!{row.source_row}",
         )
     return result
 
 
-def load_consolidated_values(path: Path) -> dict[str, dict[str, AccountValue]]:
+def load_consolidated_values(
+    path: Path, *, period: str | None = None,
+    raw_eplaza: Path | None = None, raw_impulsa: Path | None = None,
+) -> dict[str, dict[str, AccountValue]]:
     """Load the real CAM contract without treating a missing formula cache as zero."""
     source_hash = _sha256(path)
     wb = openpyxl.load_workbook(path, read_only=True, data_only=False)
@@ -422,6 +432,34 @@ def load_consolidated_values(path: Path) -> dict[str, dict[str, AccountValue]]:
     required = {"ACCOUNT_CODE", "EPLAZA.DESCRIPTION", "IMPULSA.DESCRIPTION", "EPLAZA.VALORES_UF", "IMPULSA.VALORES_UF", "TOTAL.VALORES_UF"}
     if not required <= set(headers):
         raise ValueError(f"CONSOLIDATED_COLUMNS_MISSING:{sorted(required - set(headers))}")
+    raw_paths = {"EPLAZA": raw_eplaza, "IMPULSA": raw_impulsa}
+    coverage: dict[str, dict[str, AccountValue]] | None = None
+    if any(raw_paths.values()):
+        if not all(raw_paths.values()):
+            raise ValueError("RAW_COVERAGE_REQUIRES_BOTH_ENTITIES")
+        if "CONTROL" not in wb.sheetnames:
+            raise ValueError("CONSOLIDATED_CONTROL_SHEET_MISSING")
+        control_ws = wb["CONTROL"]
+        control = {
+            str(control_ws.cell(row, 1).value): (
+                control_ws.cell(row, 2).value,
+                str(control_ws.cell(row, 3).value or "").lower(),
+            )
+            for row in range(2, control_ws.max_row + 1)
+        }
+        if period is not None and str(control.get("PERIOD", (None, ""))[0]) != period:
+            raise ValueError("CONSOLIDATED_PERIOD_MISMATCH")
+        coverage = {}
+        for entity, raw_path in raw_paths.items():
+            assert raw_path is not None
+            actual_hash = _sha256(raw_path)
+            control_key = f"{entity}_RAW"
+            if control_key not in control or control[control_key][1] != actual_hash:
+                raise ValueError(f"CONSOLIDATED_RAW_HASH_MISMATCH:{entity}")
+            coverage[entity] = load_entity_values(raw_path, entity)
+            count_key = f"{entity}_ACCOUNTS"
+            if int(control.get(count_key, (-1, ""))[0]) != len(coverage[entity]):
+                raise ValueError(f"CONSOLIDATED_RAW_ACCOUNT_COUNT_MISMATCH:{entity}")
     values: dict[str, dict[str, AccountValue]] = {"EPLAZA": {}, "IMPULSA": {}}
     for row_number in range(header_row + 1, ws.max_row + 1):
         account = ws.cell(row_number, headers["ACCOUNT_CODE"]).value
@@ -431,6 +469,7 @@ def load_consolidated_values(path: Path) -> dict[str, dict[str, AccountValue]]:
         e_value = ws.cell(row_number, headers["EPLAZA.VALORES_UF"]).value
         i_value = ws.cell(row_number, headers["IMPULSA.VALORES_UF"]).value
         total_formula = ws.cell(row_number, headers["TOTAL.VALORES_UF"]).value
+        row_control = str(ws.cell(row_number, headers.get("CONTROL", 0)).value or "") if "CONTROL" in headers else ""
         if not isinstance(total_formula, str) or not total_formula.startswith("="):
             raise ValueError(f"TOTAL_VALORES_UF_FORMULA_MISSING:{account_id}")
         for entity, raw_value, description_key in (
@@ -438,18 +477,51 @@ def load_consolidated_values(path: Path) -> dict[str, dict[str, AccountValue]]:
             ("IMPULSA", i_value, "IMPULSA.DESCRIPTION"),
         ):
             description = str(ws.cell(row_number, headers[description_key]).value or "").strip()
-            if not description:
-                continue
-            if raw_value is None:
+            raw_account = coverage[entity].get(account_id) if coverage is not None else None
+            if description and raw_value is None:
                 raise ValueError(f"CONSOLIDATED_ENTITY_VALUE_MISSING:{account_id}:{entity}")
+            expected_absence_control = "IMPULSA_ONLY" if entity == "EPLAZA" else "EPLAZA_ONLY"
+            if not description:
+                if coverage is None:
+                    continue
+                if raw_account is not None:
+                    raise ValueError(f"CONSOLIDATED_DESCRIPTION_MISSING_FOR_RAW_ACCOUNT:{account_id}:{entity}")
+                if row_control != expected_absence_control or Decimal(str(raw_value or 0)).quantize(UF_SCALE) != 0:
+                    raise ValueError(f"CONSOLIDATED_ABSENCE_NOT_VERIFIED:{account_id}:{entity}")
+                values[entity][account_id] = AccountValue(
+                    entity=entity,
+                    account_id=account_id,
+                    description="[ACCOUNT_ABSENT_FROM_ENTITY_LEDGER]",
+                    value_uf=Decimal("0.00"),
+                    source_sheet=sheet_name,
+                    source_row=row_number,
+                    source_sha256=source_hash,
+                    value_state="ZERO_VERIFIED",
+                    evidence=(
+                        f"RAW_FULL_COVERAGE_ABSENCE:{entity};CAM_CONTROL={row_control};"
+                        f"CAM_ZERO={sheet_name}!{row_number};RAW_SHA256={_sha256(raw_paths[entity])}"
+                    ),
+                )
+                continue
+            value = Decimal(str(raw_value)).quantize(UF_SCALE)
+            if coverage is not None:
+                if raw_account is None:
+                    raise ValueError(f"CONSOLIDATED_RAW_ACCOUNT_MISSING:{account_id}:{entity}")
+                if raw_account.value_uf != value:
+                    raise ValueError(f"CONSOLIDATED_RAW_VALUE_MISMATCH:{account_id}:{entity}")
             values[entity][account_id] = AccountValue(
                 entity=entity,
                 account_id=account_id,
                 description=description,
-                value_uf=Decimal(str(raw_value)).quantize(UF_SCALE),
+                value_uf=value,
                 source_sheet=sheet_name,
                 source_row=row_number,
                 source_sha256=source_hash,
+                value_state="ZERO_VERIFIED" if value == 0 else "VALUE",
+                evidence=(
+                    f"CAM_ACCOUNT_PRESENT:{sheet_name}!{row_number};CAM_CONTROL={row_control};"
+                    + (raw_account.evidence if raw_account is not None else "RAW_COVERAGE_NOT_PROVIDED")
+                ),
             )
     return values
 
@@ -490,6 +562,8 @@ def calculate(
                 coefficient=rule.coefficient,
                 contribution_uf=contribution,
                 status="APPLIED" if value is not None else MISSING,
+                source_state=account.value_state if account else "UNKNOWN",
+                evidence=account.evidence if account else "NO_ACCOUNT_OR_COVERAGE_EVIDENCE",
             ))
     target_lookup = {target.target_id: target for target in TARGETS}
     results: list[TargetResult] = []
@@ -589,10 +663,13 @@ def build_funding_memo(
 ) -> dict[str, object]:
     rules = tuple(rules)
     decision_records = tuple(decision_records)
-    values = load_consolidated_values(consolidated)
+    values = load_consolidated_values(
+        consolidated, period=period, raw_eplaza=raw_eplaza, raw_impulsa=raw_impulsa
+    )
     contributions, results, unassigned = calculate(rules, values)
     target_inventory_csv = mapping_csv.with_name("KTMA_FM_TARGET_INVENTORY_72_V1.csv")
-    for path in (output, mapping_csv, target_inventory_csv, results_json, unassigned_csv, conceptual_md):
+    coverage_csv = mapping_csv.with_name("KTMA_FM_ZERO_COVERAGE_V1.csv")
+    for path in (output, mapping_csv, target_inventory_csv, coverage_csv, results_json, unassigned_csv, conceptual_md):
         path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(template, output)
     wb = openpyxl.load_workbook(output)
@@ -610,11 +687,23 @@ def build_funding_memo(
         )
         for address in (target.cell_total, target.cell_eplaza, target.cell_impulsa):
             fm[address].number_format = '#,##0.00;[Red](#,##0.00);-'
-    for name in ("KTMA_MAPPING", "KTMA_RESULTS", "KTMA_DECISIONS", "KTMA_UNASSIGNED"):
+    for name in ("KTMA_MAPPING", "KTMA_RESULTS", "KTMA_COVERAGE", "KTMA_DECISIONS", "KTMA_UNASSIGNED"):
         if name in wb.sheetnames:
             del wb[name]
     _write_table(wb.create_sheet("KTMA_MAPPING"), list(MappingRule.__dataclass_fields__), [list(asdict(r).values()) for r in rules])
     _write_table(wb.create_sheet("KTMA_RESULTS"), list(TargetResult.__dataclass_fields__), [list(asdict(r).values()) for r in results])
+    coverage_headers = [
+        "fm_target_id", "fm_target_name", *Contribution.__dataclass_fields__,
+    ]
+    rule_lookup = {rule.mapping_id: rule for rule in rules}
+    _write_table(
+        wb.create_sheet("KTMA_COVERAGE"), coverage_headers,
+        [[
+            rule_lookup[c.mapping_id].fm_target_id,
+            rule_lookup[c.mapping_id].fm_target_name,
+            *asdict(c).values(),
+        ] for c in contributions],
+    )
     decision_fields = list(dict.fromkeys(key for event in decision_records for key in event))
     _write_table(
         wb.create_sheet("KTMA_DECISIONS"),
@@ -627,6 +716,26 @@ def build_funding_memo(
     wb.save(output)
     write_master_mapping(mapping_csv, rules)
     write_target_inventory(target_inventory_csv, output)
+    with coverage_csv.open("w", encoding="utf-8-sig", newline="") as handle:
+        fields = [
+            "FM_TARGET_ID", "FM_TARGET_NAME", "ACCOUNT_ID", "ENTITY", "SOURCE_STATE",
+            "SOURCE_VALUE_UF", "COEFFICIENT", "CONTRIBUTION_UF", "EVIDENCE",
+        ]
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for contribution in contributions:
+            rule = rule_lookup[contribution.mapping_id]
+            writer.writerow({
+                "FM_TARGET_ID": rule.fm_target_id,
+                "FM_TARGET_NAME": rule.fm_target_name,
+                "ACCOUNT_ID": contribution.account_id,
+                "ENTITY": contribution.entity,
+                "SOURCE_STATE": contribution.source_state,
+                "SOURCE_VALUE_UF": contribution.source_value_uf,
+                "COEFFICIENT": contribution.coefficient,
+                "CONTRIBUTION_UF": contribution.contribution_uf,
+                "EVIDENCE": contribution.evidence,
+            })
     with unassigned_csv.open("w", encoding="utf-8-sig", newline="") as handle:
         fields = list(unassigned[0]) if unassigned else ["STATUS"]
         writer = csv.DictWriter(handle, fieldnames=fields)
@@ -648,6 +757,10 @@ def build_funding_memo(
         "results": [{k: str(v) if isinstance(v, Decimal) else v for k, v in asdict(r).items()} for r in results],
         "unassigned_account_ids": len({row["ACCOUNT_ID"] for row in unassigned}),
         "unassigned_entity_records": len(unassigned),
+        "coverage_states": {
+            state: sum(contribution.source_state == state for contribution in contributions)
+            for state in ("VALUE", "ZERO_VERIFIED", "UNKNOWN")
+        },
         "generated_at": datetime.now().astimezone().isoformat(),
     }
     results_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

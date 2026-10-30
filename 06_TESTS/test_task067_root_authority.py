@@ -151,13 +151,17 @@ def test_public_sqlite_write_helpers_require_guard(entrypoint: str):
 def test_legacy_financial_launchers_converge_on_guarded_cli(launcher: str):
     workbook = ROOT / "OUTPUT/2026.08/CAM2026.08_CONSOL.ALIGN.xlsx"
     before = hashlib.sha256(workbook.read_bytes()).hexdigest()
+    inherited_pythonpath = os.environ.get("PYTHONPATH")
+    child_pythonpath = os.pathsep.join(
+        part for part in (str(ROOT / "src"), inherited_pythonpath) if part
+    )
     completed = subprocess.run(
         [sys.executable, str(ROOT / launcher)],
         cwd=ROOT,
         text=True,
         capture_output=True,
         check=False,
-        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": str(ROOT / "src")},
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONPATH": child_pythonpath},
     )
     assert completed.returncode != 0
     assert "ROOT_BOUNDARY_DENIED" in completed.stderr

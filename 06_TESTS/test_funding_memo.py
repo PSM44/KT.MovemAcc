@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import openpyxl
+import kt_movemacc.funding_memo as funding_memo_module
 
 from kt_movemacc.funding_memo import (
     AccountValue,
@@ -128,6 +129,71 @@ def test_consolidated_blank_entity_description_is_absence_not_zero(tmp_path):
     values = load_consolidated_values(path)
     assert values["EPLAZA"]["120911"].value_uf == Decimal("10.00")
     assert "120911" not in values["IMPULSA"]
+
+
+def test_full_raw_coverage_proves_absent_entity_contribution_is_zero(tmp_path, monkeypatch):
+    path = tmp_path / "cam.xlsx"
+    raw_eplaza = tmp_path / "eplaza.xlsb"
+    raw_impulsa = tmp_path / "impulsa.xlsb"
+    raw_eplaza.write_bytes(b"eplaza-complete")
+    raw_impulsa.write_bytes(b"impulsa-complete")
+    eplaza_account = AccountValue(
+        "EPLAZA", "120911", "Terreno", Decimal("10.00"), "RAW", 1,
+        funding_memo_module._sha256(raw_eplaza), "VALUE", "RAW_ACCOUNT_PRESENT",
+    )
+    monkeypatch.setattr(
+        funding_memo_module, "load_entity_values",
+        lambda raw_path, entity: {"120911": eplaza_account} if entity == "EPLAZA" else {},
+    )
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "CONSOL.ALIGN"
+    ws.append([
+        "ACCOUNT_CODE", "EPLAZA.DESCRIPTION", "IMPULSA.DESCRIPTION",
+        "EPLAZA.VALORES_UF", "IMPULSA.VALORES_UF", "TOTAL.VALORES_UF", "CONTROL",
+    ])
+    ws.append(["120911", "Terreno", None, 10, 0, "=D2+E2", "EPLAZA_ONLY"])
+    control = wb.create_sheet("CONTROL")
+    control.append(["CONTROL_KEY", "VALUE", "DETAIL"])
+    control.append(["PERIOD", "2026.09", None])
+    control.append(["EPLAZA_RAW", raw_eplaza.name, funding_memo_module._sha256(raw_eplaza)])
+    control.append(["IMPULSA_RAW", raw_impulsa.name, funding_memo_module._sha256(raw_impulsa)])
+    control.append(["EPLAZA_ACCOUNTS", 1, None])
+    control.append(["IMPULSA_ACCOUNTS", 0, None])
+    wb.save(path)
+    values = load_consolidated_values(
+        path, period="2026.09", raw_eplaza=raw_eplaza, raw_impulsa=raw_impulsa,
+    )
+    absent = values["IMPULSA"]["120911"]
+    assert absent.value_uf == Decimal("0.00")
+    assert absent.value_state == "ZERO_VERIFIED"
+    assert "RAW_FULL_COVERAGE_ABSENCE" in absent.evidence
+    _, results, _ = calculate([mapping_rules()[0]], values)
+    assert results[0].total_uf == Decimal("10.00")
+
+
+def test_raw_coverage_hash_mismatch_is_rejected(tmp_path):
+    path = tmp_path / "cam.xlsx"
+    raw_eplaza = tmp_path / "eplaza.xlsb"
+    raw_impulsa = tmp_path / "impulsa.xlsb"
+    raw_eplaza.write_bytes(b"e")
+    raw_impulsa.write_bytes(b"i")
+    wb = openpyxl.Workbook()
+    wb.active.title = "CONSOL.ALIGN"
+    wb.active.append([
+        "ACCOUNT_CODE", "EPLAZA.DESCRIPTION", "IMPULSA.DESCRIPTION",
+        "EPLAZA.VALORES_UF", "IMPULSA.VALORES_UF", "TOTAL.VALORES_UF", "CONTROL",
+    ])
+    control = wb.create_sheet("CONTROL")
+    control.append(["CONTROL_KEY", "VALUE", "DETAIL"])
+    control.append(["PERIOD", "2026.09", None])
+    control.append(["EPLAZA_RAW", raw_eplaza.name, "0" * 64])
+    control.append(["IMPULSA_RAW", raw_impulsa.name, funding_memo_module._sha256(raw_impulsa)])
+    wb.save(path)
+    with pytest.raises(ValueError, match="CONSOLIDATED_RAW_HASH_MISMATCH:EPLAZA"):
+        load_consolidated_values(
+            path, period="2026.09", raw_eplaza=raw_eplaza, raw_impulsa=raw_impulsa,
+        )
 
 
 def test_invalid_coefficient_rejected():
