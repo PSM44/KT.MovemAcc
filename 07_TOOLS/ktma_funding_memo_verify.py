@@ -8,6 +8,13 @@ from pathlib import Path
 
 import openpyxl
 
+from kt_movemacc.funding_memo import (
+    DECISION_ID,
+    active_decision_history,
+    load_decision_history,
+    reconstruct_mapping_history,
+)
+
 
 TARGET_ROWS = (27, 28, 31, 48, 32, 36, 41, 42, 38, 39, 37, 49, 50, 53, 55, 40)
 ALLOWED = {f"{column}{row}" for row in TARGET_ROWS for column in "DEF"}
@@ -36,6 +43,79 @@ def same_style(left, right) -> bool:
     )
 
 
+def write_closure_artifacts(
+    run_dir: Path, root: Path, payload: dict[str, object], report: dict[str, object],
+    source_wb, output_values_wb,
+) -> None:
+    interpretations = {
+        "FM-T038": "IVA pendiente de criterio; no se agregó IVA automático",
+        "FM-T039": "Signo contable negativo preservado",
+        "FM-T050": "Solo cuenta 121031; no se inventaron honorarios adicionales",
+        "FM-T040": "Asignación HUMAN provisional a 410457",
+    }
+    differences_path = run_dir / "KTMA_FM_FINANCIAL_DIFFERENCES.csv"
+    with differences_path.open("w", encoding="utf-8-sig", newline="") as handle:
+        fields = ["FM_TARGET_ID", "FM_TARGET_NAME", "HISTORICAL_V0_CELL", "HISTORICAL_V0_UF", "CURRENT_PERIOD_UF", "DIFFERENCE_UF", "INTERPRETATION"]
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        source_fm = source_wb["FM"]
+        current_fm = output_values_wb["FM"]
+        for result in payload["results"]:
+            target_id = result["target_id"]
+            row_number = int(target_id[-3:])
+            historical = source_fm[f"C{row_number}"].value
+            current = current_fm[f"D{row_number}"].value
+            difference = current - historical if isinstance(current, (int, float)) and isinstance(historical, (int, float)) else None
+            writer.writerow({
+                "FM_TARGET_ID": target_id, "FM_TARGET_NAME": result["target_name"],
+                "HISTORICAL_V0_CELL": f"C{row_number}", "HISTORICAL_V0_UF": historical,
+                "CURRENT_PERIOD_UF": current, "DIFFERENCE_UF": difference,
+                "INTERPRETATION": interpretations.get(target_id, "Comparación referencial entre períodos"),
+            })
+    final_report_text = (
+        "# KT.MovemAcc — cierre Funding Memo\n\n"
+        f"Período: `{payload['period']}`. Mapping: `{payload['mapping_version']}`. "
+        f"Decisión activa: `{payload['decision_id']}`.\n\n"
+        f"Cuentas: {payload['map_total_accounts']} totales; {payload['mapped_accounts']} asignadas; "
+        f"{payload['unassigned_account_ids']} sin asignación. Destinos físicos verificados: "
+        f"{payload['fm_targets_verified']}. QA independiente: PASS ({len(report['checks'])}/{len(report['checks'])}). "
+        "Excel COM: PASS. RAW.INPUT: hashes preservados.\n\n"
+        "Excepciones financieras pendientes: IVA de construcción 120971/120973; alcance adicional de "
+        "Comercialización 121031; asignación provisional Software 410457.\n"
+    )
+    (run_dir / "KTMA_FM_FINAL_REPORT.md").write_text(final_report_text, encoding="utf-8")
+    artifact_names = [
+        "FM2026.09_ACCOUNTING_MAPPING_V1.xlsx", "KTMA_FM_MAPPING_MASTER_V1.csv",
+        "KTMA_FM_TARGET_INVENTORY_72_V1.csv", "KTMA_FM_RESULTS_V1.json",
+        "KTMA_FM_UNASSIGNED_V1.csv", "KTMA_FM_MAPPING_CONCEPTUAL_V1.md",
+        "KTMA_FM_FINANCIAL_DIFFERENCES.csv", "KTMA_FM_INDEPENDENT_QA.json",
+        "KTMA_FM_EXCEL_COM_RECEIPT.json", "KTMA_FM_FINAL_REPORT.md",
+    ]
+    manifest = {
+        "run_id": run_dir.name,
+        "period": payload["period"],
+        "mapping_version": payload["mapping_version"],
+        "decision_id": payload["decision_id"],
+        "source_hashes": payload["source_hashes"],
+        "final_workbook_sha256": report["output_sha256"],
+        "artifact_sha256": {
+            name: sha256(run_dir / name) for name in artifact_names if (run_dir / name).is_file()
+        },
+        "authorized_workbook_changes": {
+            "FM": "D/E/F at 16 mapped rows; B and D:F widths",
+            "added_sheets": ["KTMA_MAPPING", "KTMA_RESULTS", "KTMA_DECISIONS", "KTMA_UNASSIGNED"],
+        },
+        "preservation": {
+            "raw_input_mutated": False, "template_overwritten": False,
+            "non_target_formulas_and_values": "PASS_WITH_NUMERIC_SERIALIZATION_TOLERANCE_1E-9_UF",
+            "excel_com_validation": "PASS", "independent_qa": f"PASS_{len(report['checks'])}_OF_{len(report['checks'])}",
+        },
+    }
+    (run_dir / "KTMA_FM_OUTPUT_CHANGE_MANIFEST.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
@@ -52,6 +132,9 @@ def main() -> int:
     rows = list(csv.DictReader(mapping_path.open(encoding="utf-8-sig")))
     inventory = list(csv.DictReader(inventory_path.open(encoding="utf-8-sig")))
     payload = json.loads(results_path.read_text(encoding="utf-8"))
+    history = load_decision_history(root / "04_CONFIG/FUNDING_MEMO/KTMA_FM_DECISIONS.jsonl")
+    active_history = active_decision_history(history)
+    _, effective_rules = reconstruct_mapping_history(history, payload["period"])
     source_wb = openpyxl.load_workbook(template, data_only=False)
     output_wb = openpyxl.load_workbook(output, data_only=False)
     output_values_wb = openpyxl.load_workbook(output, data_only=True)
@@ -62,6 +145,19 @@ def main() -> int:
         check(len(inventory) == 72 and len({row["FM_TARGET_CELL"] for row in inventory}) == 72, "physical_inventory_72", len(inventory)),
         check(payload["map_total_accounts"] == 253 and payload["mapped_accounts"] == 66 and payload["unassigned_account_ids"] == 187, "account_denominators", {key: payload[key] for key in ("map_total_accounts", "mapped_accounts", "unassigned_account_ids")}),
         check(all(row["STATUS"] == "IMPLEMENTED" and row["COEFFICIENT"] in {"1", "-1"} for row in rows), "mapping_status_and_coefficients", "all implemented; coefficients +/-1"),
+        check(len(effective_rules) == 66 and {rule.decision_id for rule in effective_rules} == {DECISION_ID}, "history_reconstructs_effective_mapping", {"rules": len(effective_rules), "decision_id": DECISION_ID}),
+        check(any(event.get("SUPERSEDES_DECISION_ID") == "KTMA-FM-DEC-20261029-001" for event in history), "unsupported_legacy_timestamps_superseded", len(history)),
+        check(all(event.get("DATE_TIME") is None for event in active_history), "unknown_communication_times_remain_null", [event.get("DATE_TIME") for event in active_history]),
+        check(
+            all(item["source_value_uf"] is None and item["contribution_uf"] is None for item in payload["contributions"] if item["status"] == "SIN_DATO_ENTIDAD"),
+            "missing_entity_data_not_converted_to_zero",
+            sum(item["status"] == "SIN_DATO_ENTIDAD" for item in payload["contributions"]),
+        ),
+        check(
+            any(item["status"] == "PARTIAL_MISSING_ACCOUNT_DATA" for item in payload["results"]),
+            "partial_targets_remain_explicit",
+            {item["target_id"]: item["status"] for item in payload["results"]},
+        ),
     ]
     differences: list[str] = []
     for sheet_name in source_wb.sheetnames:
@@ -96,7 +192,10 @@ def main() -> int:
     target_by_total = {row["FM_CELL_TOTAL"]: result_lookup[row["FM_TARGET_ID"]]["total_uf"] for row in rows}
     for cell, expected in target_by_total.items():
         actual = cached_fm[cell].value
-        if expected is None or not isinstance(actual, (int, float)) or round(float(actual), 2) != round(float(expected), 2):
+        if expected is None:
+            if actual not in (None, "#N/A"):
+                cached_bad.append(cell)
+        elif not isinstance(actual, (int, float)) or round(float(actual), 2) != round(float(expected), 2):
             cached_bad.append(cell)
     checks.append(check(not cached_bad, "excel_com_cached_totals_match", sorted(set(cached_bad))))
     conceptual = conceptual_path.read_text(encoding="utf-8")
@@ -117,6 +216,8 @@ def main() -> int:
     }
     report_path = run_dir / "KTMA_FM_INDEPENDENT_QA.json"
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    if not failed:
+        write_closure_artifacts(run_dir, root, payload, report, source_wb, output_values_wb)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0 if not failed else 1
 

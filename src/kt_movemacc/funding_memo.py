@@ -16,8 +16,8 @@ from openpyxl.utils.cell import coordinate_to_tuple
 from .engine import parse_xlsb
 
 
-MAPPING_VERSION = "1.0.0"
-DECISION_ID = "KTMA-FM-DEC-20261029-001"
+MAPPING_VERSION = "1.0.1"
+DECISION_ID = "KTMA-FM-DEC-20261030-001"
 MISSING = "SIN_DATO_ENTIDAD"
 UF_SCALE = Decimal("0.01")
 FM_TARGET_CELL_INVENTORY = tuple(
@@ -194,9 +194,11 @@ def validate_rules(rules: Iterable[MappingRule]) -> None:
             raise ValueError(f"COEFFICIENT_INVALID:{rule.mapping_id}")
         if rule.fm_target_id not in target_ids:
             raise ValueError(f"FM_TARGET_UNKNOWN:{rule.fm_target_id}")
-        prior = seen.setdefault(rule.account_id, rule.fm_target_id)
-        if prior != rule.fm_target_id:
-            raise ValueError(f"ACCOUNT_MULTIPLE_TARGETS:{rule.account_id}:{prior}:{rule.fm_target_id}")
+        if rule.account_id in seen:
+            raise ValueError(
+                f"ACCOUNT_MULTIPLE_TARGETS:{rule.account_id}:{seen[rule.account_id]}:{rule.fm_target_id}"
+            )
+        seen[rule.account_id] = rule.fm_target_id
 
 
 def effective_rules_for_period(rules: Iterable[MappingRule], period: str) -> tuple[MappingRule, ...]:
@@ -205,6 +207,121 @@ def effective_rules_for_period(rules: Iterable[MappingRule], period: str) -> tup
         if rule.valid_from <= period and (rule.valid_to is None or period <= rule.valid_to)
         and rule.status in {"IMPLEMENTED", "SUPERSEDED"}
     )
+
+
+DECISION_STATUSES = {"PROPOSED", "APPROVED", "IMPLEMENTED", "REJECTED", "SUPERSEDED"}
+DECISION_AUTHORITY_TYPES = {
+    "HUMAN_DIRECT", "MANAGEMENT_REPORTED_BY_HUMAN",
+    "BOARD_REPORTED_BY_HUMAN", "SYSTEM_CORRECTION",
+}
+
+
+def validate_decision_event(event: dict[str, object], *, allow_legacy: bool = False) -> None:
+    required = {
+        "DECISION_ID", "DATE_TIME", "TIMEZONE", "DECISION_AUTHORITY",
+        "DECISION_SOURCE", "ORIGINAL_INSTRUCTION", "ACCOUNT_ID",
+        "PREVIOUS_FM_TARGET", "NEW_FM_TARGET", "PREVIOUS_COEFFICIENT",
+        "NEW_COEFFICIENT", "REASON", "EFFECTIVE_PERIOD", "RECORDED_AT",
+        "IMPLEMENTED_AT", "STATUS", "EVIDENCE_REFERENCE", "PREVIOUS_VERSION",
+        "NEW_VERSION",
+    }
+    missing = sorted(required - set(event))
+    if missing:
+        raise ValueError(f"DECISION_FIELDS_MISSING:{','.join(missing)}")
+    if event["STATUS"] not in DECISION_STATUSES:
+        raise ValueError("DECISION_STATUS_INVALID")
+    if not allow_legacy:
+        for field in ("EVENT_ID", "DECISION_AUTHORITY_TYPE", "REPORTED_BY", "RETROACTIVE_AUTHORIZED"):
+            if field not in event:
+                raise ValueError(f"DECISION_FIELDS_MISSING:{field}")
+        if event["DECISION_AUTHORITY_TYPE"] not in DECISION_AUTHORITY_TYPES:
+            raise ValueError("DECISION_AUTHORITY_TYPE_INVALID")
+        if event["DECISION_AUTHORITY_TYPE"] in {
+            "MANAGEMENT_REPORTED_BY_HUMAN", "BOARD_REPORTED_BY_HUMAN"
+        } and event.get("REPORTED_BY") != "HUMAN":
+            raise ValueError("REPORTED_AUTHORITY_REQUIRES_HUMAN_REPORTER")
+        if event.get("RETROACTIVE_AUTHORIZED") and (
+            event.get("DECISION_AUTHORITY_TYPE") != "HUMAN_DIRECT"
+            or not event.get("RETROACTIVE_AUTHORIZATION_REFERENCE")
+        ):
+            raise ValueError("RETROACTIVE_AUTHORIZATION_EVIDENCE_REQUIRED")
+    for field in ("DATE_TIME", "RECORDED_AT", "IMPLEMENTED_AT"):
+        value = event.get(field)
+        if value not in (None, ""):
+            try:
+                datetime.fromisoformat(str(value))
+            except ValueError as exc:
+                raise ValueError(f"DECISION_TIMESTAMP_INVALID:{field}") from exc
+    if event["STATUS"] == "IMPLEMENTED" and event["ACCOUNT_ID"] != "MULTIPLE:66":
+        if not event.get("EFFECTIVE_PERIOD") or not event.get("NEW_VERSION"):
+            raise ValueError("IMPLEMENTED_CHANGE_REQUIRES_PERIOD_AND_VERSION")
+
+
+def load_decision_history(path: Path) -> tuple[dict[str, object], ...]:
+    events: list[dict[str, object]] = []
+    event_ids: set[str] = set()
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
+        if not raw.strip():
+            continue
+        event = json.loads(raw)
+        is_legacy = "EVENT_ID" not in event
+        validate_decision_event(event, allow_legacy=is_legacy)
+        event_id = str(event.get("EVENT_ID") or f"LEGACY-LINE-{line_number}")
+        if event_id in event_ids:
+            raise ValueError(f"DECISION_EVENT_DUPLICATE:{event_id}")
+        event_ids.add(event_id)
+        events.append(event)
+    return tuple(events)
+
+
+def active_decision_history(events: Iterable[dict[str, object]]) -> tuple[dict[str, object], ...]:
+    events = tuple(events)
+    superseded = {
+        str(event["SUPERSEDES_DECISION_ID"])
+        for event in events
+        if event.get("STATUS") == "SUPERSEDED" and event.get("SUPERSEDES_DECISION_ID")
+    }
+    return tuple(
+        event for event in events
+        if event.get("STATUS") != "SUPERSEDED" and str(event["DECISION_ID"]) not in superseded
+    )
+
+
+def reconstruct_mapping_history(
+    events: Iterable[dict[str, object]], period: str,
+) -> tuple[tuple[MappingRule, ...], tuple[MappingRule, ...]]:
+    events = tuple(events)
+    active = active_decision_history(events)
+    base = next(
+        (event for event in active if event.get("DECISION_ID") == DECISION_ID and event.get("STATUS") == "IMPLEMENTED"),
+        None,
+    )
+    if base is None:
+        raise ValueError("MAPPING_BASE_DECISION_NOT_IMPLEMENTED")
+    all_rules = mapping_rules()
+    for event in active:
+        if event is base or event.get("STATUS") != "IMPLEMENTED" or event.get("ACCOUNT_ID") == "MULTIPLE:66":
+            continue
+        all_rules = apply_mapping_change(
+            all_rules,
+            event,
+            new_version=str(event["NEW_VERSION"]),
+            retroactive_authorized=bool(event.get("RETROACTIVE_AUTHORIZED", False)),
+        )
+    effective = effective_rules_for_period(all_rules, period)
+    validate_rules(effective)
+    return all_rules, effective
+
+
+def append_decision_event(path: Path, event: dict[str, object]) -> None:
+    validate_decision_event(event)
+    existing = load_decision_history(path) if path.exists() else ()
+    if any(item.get("EVENT_ID") == event["EVENT_ID"] for item in existing):
+        raise ValueError(f"DECISION_EVENT_DUPLICATE:{event['EVENT_ID']}")
+    if event["STATUS"] == "IMPLEMENTED" and event["ACCOUNT_ID"] != "MULTIPLE:66":
+        reconstruct_mapping_history((*existing, event), str(event["EFFECTIVE_PERIOD"]))
+    with path.open("a", encoding="utf-8", newline="") as handle:
+        handle.write(json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n")
 
 
 def apply_mapping_change(
@@ -314,18 +431,21 @@ def load_consolidated_values(path: Path) -> dict[str, dict[str, AccountValue]]:
         e_value = ws.cell(row_number, headers["EPLAZA.VALORES_UF"]).value
         i_value = ws.cell(row_number, headers["IMPULSA.VALORES_UF"]).value
         total_formula = ws.cell(row_number, headers["TOTAL.VALORES_UF"]).value
-        if e_value is None or i_value is None:
-            raise ValueError(f"CONSOLIDATED_ENTITY_VALUE_MISSING:{account_id}")
         if not isinstance(total_formula, str) or not total_formula.startswith("="):
             raise ValueError(f"TOTAL_VALORES_UF_FORMULA_MISSING:{account_id}")
         for entity, raw_value, description_key in (
             ("EPLAZA", e_value, "EPLAZA.DESCRIPTION"),
             ("IMPULSA", i_value, "IMPULSA.DESCRIPTION"),
         ):
+            description = str(ws.cell(row_number, headers[description_key]).value or "").strip()
+            if not description:
+                continue
+            if raw_value is None:
+                raise ValueError(f"CONSOLIDATED_ENTITY_VALUE_MISSING:{account_id}:{entity}")
             values[entity][account_id] = AccountValue(
                 entity=entity,
                 account_id=account_id,
-                description=str(ws.cell(row_number, headers[description_key]).value or ""),
+                description=description,
                 value_uf=Decimal(str(raw_value)).quantize(UF_SCALE),
                 source_sheet=sheet_name,
                 source_row=row_number,
@@ -376,16 +496,20 @@ def calculate(
     for target_id, target_rules in by_target.items():
         entity_values: dict[str, Decimal | None] = {}
         for entity in ("EPLAZA", "IMPULSA"):
-            present = [
-                c.contribution_uf for c in contributions
+            relevant = [
+                c for c in contributions
                 if c.entity == entity and c.mapping_id in {r.mapping_id for r in target_rules}
-                and c.contribution_uf is not None
             ]
-            entity_values[entity] = sum(present, Decimal("0")) if present else None
+            present = [c.contribution_uf for c in relevant if c.contribution_uf is not None]
+            entity_values[entity] = (
+                sum(present, Decimal("0"))
+                if relevant and len(present) == len(relevant)
+                else None
+            )
         eplaza = entity_values["EPLAZA"]
         impulsa = entity_values["IMPULSA"]
         total = eplaza + impulsa if eplaza is not None and impulsa is not None else None
-        status = "CALCULATED" if total is not None else "PARTIAL_MISSING_ENTITY_DATA"
+        status = "CALCULATED" if total is not None else "PARTIAL_MISSING_ACCOUNT_DATA"
         results.append(TargetResult(target_id, target_lookup[target_id].name, eplaza, impulsa, total, status))
     return contributions, results, unassigned
 
@@ -431,6 +555,7 @@ def write_target_inventory(path: Path, workbook_path: Path) -> None:
 
 
 def render_conceptual_markdown(path: Path, rules: Iterable[MappingRule]) -> None:
+    rules = tuple(rules)
     grouped: dict[str, list[MappingRule]] = {}
     for rule in rules:
         grouped.setdefault(rule.fm_target_id, []).append(rule)
@@ -438,7 +563,7 @@ def render_conceptual_markdown(path: Path, rules: Iterable[MappingRule]) -> None
     lines = [
         "# KT.MovemAcc — Mapeo contable a Funding Memo",
         "",
-        f"Versión de mapping: `{MAPPING_VERSION}`. Sin montos mensuales.",
+        f"Versión de mapping: `{max((rule.version for rule in rules), default=MAPPING_VERSION)}`. Sin montos mensuales.",
         "",
         "Cada flecha representa una cuenta asignada. El signo se conserva y luego se aplica el coeficiente.",
         "",
@@ -460,9 +585,10 @@ def render_conceptual_markdown(path: Path, rules: Iterable[MappingRule]) -> None
 def build_funding_memo(
     *, template: Path, output: Path, period: str, consolidated: Path, raw_eplaza: Path, raw_impulsa: Path,
     mapping_csv: Path, results_json: Path, unassigned_csv: Path, conceptual_md: Path,
-    decision_record: dict[str, object],
+    rules: Iterable[MappingRule], decision_records: Iterable[dict[str, object]],
 ) -> dict[str, object]:
-    rules = mapping_rules()
+    rules = tuple(rules)
+    decision_records = tuple(decision_records)
     values = load_consolidated_values(consolidated)
     contributions, results, unassigned = calculate(rules, values)
     target_inventory_csv = mapping_csv.with_name("KTMA_FM_TARGET_INVENTORY_72_V1.csv")
@@ -489,7 +615,12 @@ def build_funding_memo(
             del wb[name]
     _write_table(wb.create_sheet("KTMA_MAPPING"), list(MappingRule.__dataclass_fields__), [list(asdict(r).values()) for r in rules])
     _write_table(wb.create_sheet("KTMA_RESULTS"), list(TargetResult.__dataclass_fields__), [list(asdict(r).values()) for r in results])
-    _write_table(wb.create_sheet("KTMA_DECISIONS"), list(decision_record), [list(decision_record.values())])
+    decision_fields = list(dict.fromkeys(key for event in decision_records for key in event))
+    _write_table(
+        wb.create_sheet("KTMA_DECISIONS"),
+        decision_fields or ["STATUS"],
+        [[event.get(field) for field in decision_fields] for event in decision_records] or [["NONE"]],
+    )
     _write_table(wb.create_sheet("KTMA_UNASSIGNED"), list(unassigned[0]) if unassigned else ["STATUS"], [list(r.values()) for r in unassigned] if unassigned else [["NONE"]])
     wb.calculation.fullCalcOnLoad = True
     wb.calculation.forceFullCalc = True
@@ -505,11 +636,11 @@ def build_funding_memo(
     render_conceptual_markdown(conceptual_md, rules)
     payload = {
         "period": period,
-        "mapping_version": MAPPING_VERSION,
+        "mapping_version": max((rule.version for rule in rules), default=MAPPING_VERSION),
         "decision_id": DECISION_ID,
         "source_hashes": {"template": _sha256(template), "consolidated": _sha256(consolidated), "raw_eplaza": _sha256(raw_eplaza), "raw_impulsa": _sha256(raw_impulsa)},
         "output_sha256_before_excel_com": _sha256(output),
-        "map_total_accounts": len(values["EPLAZA"]),
+        "map_total_accounts": len(set(values["EPLAZA"]) | set(values["IMPULSA"])),
         "mapped_accounts": len(rules),
         "targets_implemented": len(results),
         "fm_targets_verified": len(FM_TARGET_CELL_INVENTORY),

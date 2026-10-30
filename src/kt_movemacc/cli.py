@@ -100,6 +100,15 @@ def main():
     fm_parser.add_argument("--raw-impulsa")
     fm_parser.add_argument("--out-dir", required=True, help="New non-colliding output directory under project root")
 
+    fm_decision_parser = subparsers.add_parser(
+        "funding-memo-decision", help="Append one validated Funding Memo mapping decision"
+    )
+    fm_decision_parser.add_argument("--root", default=".")
+    fm_decision_parser.add_argument("--event", required=True, help="Complete decision event JSON")
+    fm_decision_parser.add_argument(
+        "--history", default="04_CONFIG/FUNDING_MEMO/KTMA_FM_DECISIONS.jsonl"
+    )
+
     args = parser.parse_args()
 
     if args.command == "ph1":
@@ -167,8 +176,21 @@ def main():
             semantic_key=args.semantic_key,
         )
         print(json.dumps(result, indent=2, ensure_ascii=False))
+    elif args.command == "funding-memo-decision":
+        from kt_movemacc.funding_memo import append_decision_event
+
+        root = Path(args.root).resolve()
+        history_arg = Path(args.history)
+        history = history_arg.resolve() if history_arg.is_absolute() else (root / history_arg).resolve()
+        try:
+            history.relative_to(root)
+        except ValueError as exc:
+            raise SystemExit("ROOT_BOUNDARY_DENIED: decision history must remain under project root") from exc
+        event = json.loads(Path(args.event).resolve().read_text(encoding="utf-8-sig"))
+        append_decision_event(history, event)
+        print(json.dumps({"status": "APPENDED", "event_id": event["EVENT_ID"]}, ensure_ascii=False))
     elif args.command == "funding-memo":
-        from kt_movemacc.funding_memo import DECISION_ID, build_funding_memo
+        from kt_movemacc.funding_memo import build_funding_memo, load_decision_history, reconstruct_mapping_history
 
         root = Path(args.root).resolve()
         out_dir = Path(args.out_dir).resolve()
@@ -189,9 +211,8 @@ def main():
             if not source.is_file():
                 raise SystemExit(f"SOURCE_NOT_FOUND: {source}")
         decision_path = root / "04_CONFIG" / "FUNDING_MEMO" / "KTMA_FM_DECISIONS.jsonl"
-        decision = json.loads(decision_path.read_text(encoding="utf-8").splitlines()[-1])
-        if decision.get("DECISION_ID") != DECISION_ID or decision.get("STATUS") != "IMPLEMENTED":
-            raise SystemExit("MAPPING_DECISION_NOT_IMPLEMENTED")
+        decisions = load_decision_history(decision_path)
+        _, effective_rules = reconstruct_mapping_history(decisions, args.period)
         out_dir.mkdir(parents=True, exist_ok=False)
         payload = build_funding_memo(
             template=template,
@@ -204,7 +225,8 @@ def main():
             results_json=out_dir / "KTMA_FM_RESULTS_V1.json",
             unassigned_csv=out_dir / "KTMA_FM_UNASSIGNED_V1.csv",
             conceptual_md=out_dir / "KTMA_FM_MAPPING_CONCEPTUAL_V1.md",
-            decision_record=decision,
+            rules=effective_rules,
+            decision_records=decisions,
         )
         print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:

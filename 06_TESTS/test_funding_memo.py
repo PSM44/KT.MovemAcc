@@ -1,7 +1,9 @@
 from dataclasses import replace
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
+import openpyxl
 
 from kt_movemacc.funding_memo import (
     AccountValue,
@@ -11,8 +13,13 @@ from kt_movemacc.funding_memo import (
     MappingRule,
     calculate,
     apply_mapping_change,
+    append_decision_event,
     effective_rules_for_period,
+    load_decision_history,
+    load_consolidated_values,
     mapping_rules,
+    reconstruct_mapping_history,
+    validate_decision_event,
     validate_rules,
 )
 
@@ -85,7 +92,42 @@ def test_monthly_values_change_without_mapping_change():
     second = calculate([rule], {"EPLAZA": {rule.account_id: value("EPLAZA", rule.account_id, "3")}, "IMPULSA": {rule.account_id: value("IMPULSA", rule.account_id, "4")}})[1][0]
     assert first.total_uf == Decimal("3")
     assert second.total_uf == Decimal("7")
-    assert rule.version == "1.0.0"
+    assert rule.version == "1.0.1"
+
+
+def test_exact_duplicate_mapping_is_rejected():
+    rule = mapping_rules()[0]
+    with pytest.raises(ValueError, match="ACCOUNT_MULTIPLE_TARGETS"):
+        validate_rules([rule, replace(rule, mapping_id="duplicate")])
+
+
+def test_partial_missing_account_data_is_not_summed_as_zero():
+    rules = [rule for rule in mapping_rules() if rule.fm_target_id == "FM-T036"]
+    values = {
+        "EPLAZA": {rules[0].account_id: value("EPLAZA", rules[0].account_id, "10")},
+        "IMPULSA": {rules[0].account_id: value("IMPULSA", rules[0].account_id, "20")},
+    }
+    _, results, _ = calculate(rules, values)
+    assert results[0].eplaza_uf is None
+    assert results[0].impulsa_uf is None
+    assert results[0].total_uf is None
+    assert results[0].status == "PARTIAL_MISSING_ACCOUNT_DATA"
+
+
+def test_consolidated_blank_entity_description_is_absence_not_zero(tmp_path):
+    path = tmp_path / "cam.xlsx"
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "CONSOL.ALIGN"
+    ws.append([
+        "ACCOUNT_CODE", "EPLAZA.DESCRIPTION", "IMPULSA.DESCRIPTION",
+        "EPLAZA.VALORES_UF", "IMPULSA.VALORES_UF", "TOTAL.VALORES_UF",
+    ])
+    ws.append(["120911", "Terreno", None, 10, 0, "=D2+E2"])
+    wb.save(path)
+    values = load_consolidated_values(path)
+    assert values["EPLAZA"]["120911"].value_uf == Decimal("10.00")
+    assert "120911" not in values["IMPULSA"]
 
 
 def test_invalid_coefficient_rejected():
@@ -133,3 +175,62 @@ def test_retroactive_change_requires_explicit_authorization():
     }
     with pytest.raises(ValueError, match="RETROACTIVE_AUTHORIZATION_REQUIRED"):
         apply_mapping_change(mapping_rules(), decision, new_version="1.1.0")
+
+
+def test_persisted_history_supersedes_unsupported_legacy_record_and_reconstructs_base():
+    history_path = Path(__file__).parents[1] / "04_CONFIG/FUNDING_MEMO/KTMA_FM_DECISIONS.jsonl"
+    events = load_decision_history(history_path)
+    _, effective = reconstruct_mapping_history(events, "2026.09")
+    assert len(events) == 3
+    assert len(effective) == 66
+    assert {rule.decision_id for rule in effective} == {"KTMA-FM-DEC-20261030-001"}
+
+
+def test_append_only_future_change_preserves_prior_period(tmp_path):
+    source = Path(__file__).parents[1] / "04_CONFIG/FUNDING_MEMO/KTMA_FM_DECISIONS.jsonl"
+    history = tmp_path / "history.jsonl"
+    original = source.read_bytes()
+    history.write_bytes(original)
+    rule = mapping_rules()[0]
+    event = {
+        "EVENT_ID": "TEST-EVENT-001", "DECISION_ID": "TEST-DECISION-001",
+        "DATE_TIME": None, "TIMEZONE": "America/Santiago",
+        "DECISION_AUTHORITY": "HUMAN", "DECISION_AUTHORITY_TYPE": "HUMAN_DIRECT",
+        "REPORTED_BY": None, "DECISION_SOURCE": "test evidence",
+        "ORIGINAL_INSTRUCTION": "Move account for the future test period.",
+        "ACCOUNT_ID": rule.account_id, "PREVIOUS_FM_TARGET": rule.fm_target_id,
+        "NEW_FM_TARGET": "FM-T028", "PREVIOUS_COEFFICIENT": 1,
+        "NEW_COEFFICIENT": -1, "REASON": "test", "EFFECTIVE_PERIOD": "2026.10",
+        "RECORDED_AT": None, "IMPLEMENTED_AT": None, "STATUS": "IMPLEMENTED",
+        "EVIDENCE_REFERENCE": "test", "PREVIOUS_VERSION": "1.0.1",
+        "NEW_VERSION": "1.1.0", "RETROACTIVE_AUTHORIZED": False,
+    }
+    append_decision_event(history, event)
+    assert history.read_bytes().startswith(original)
+    events = load_decision_history(history)
+    _, september = reconstruct_mapping_history(events, "2026.09")
+    _, october = reconstruct_mapping_history(events, "2026.10")
+    assert next(r for r in september if r.account_id == rule.account_id).fm_target_id == "FM-T027"
+    october_rule = next(r for r in october if r.account_id == rule.account_id)
+    assert october_rule.fm_target_id == "FM-T028"
+    assert october_rule.coefficient == -1
+    assert october_rule.version == "1.1.0"
+    with pytest.raises(ValueError, match="DECISION_EVENT_DUPLICATE"):
+        append_decision_event(history, event)
+
+
+def test_retroactive_event_requires_explicit_human_evidence():
+    event = {
+        "EVENT_ID": "TEST-RETRO", "DECISION_ID": "TEST-RETRO", "DATE_TIME": None,
+        "TIMEZONE": "America/Santiago", "DECISION_AUTHORITY": "HUMAN",
+        "DECISION_AUTHORITY_TYPE": "HUMAN_DIRECT", "REPORTED_BY": None,
+        "DECISION_SOURCE": "test", "ORIGINAL_INSTRUCTION": "test",
+        "ACCOUNT_ID": "120911", "PREVIOUS_FM_TARGET": "FM-T027",
+        "NEW_FM_TARGET": "FM-T028", "PREVIOUS_COEFFICIENT": 1,
+        "NEW_COEFFICIENT": 1, "REASON": "test", "EFFECTIVE_PERIOD": "2026.08",
+        "RECORDED_AT": None, "IMPLEMENTED_AT": None, "STATUS": "IMPLEMENTED",
+        "EVIDENCE_REFERENCE": "test", "PREVIOUS_VERSION": "1.0.1",
+        "NEW_VERSION": "1.1.0", "RETROACTIVE_AUTHORIZED": True,
+    }
+    with pytest.raises(ValueError, match="RETROACTIVE_AUTHORIZATION_EVIDENCE_REQUIRED"):
+        validate_decision_event(event)
