@@ -1,118 +1,112 @@
 # KT.MovemAcc — MR0 | Registro maestro de ejecución y control
 
-**Autor:** Pablo San Martín  
-**Fecha de actualización:** 21 de octubre de 2026  
-**Versión:** 2026-10-21 — propuesta para aprobación humana  
-**Estado:** BORRADOR PARA REVISIÓN; no instalado en el repositorio  
-**Documento rector:** `KTMA_HOJA_DE_RUTA_20261021_PABLO_SAN_MARTIN.md` — aprobado por Pablo San Martín el 21-10-2026.  
-**Raíz esperada:** `C:\01. GitHub\Kumquat.TECH\KT.MovemAcc`
+**Autor:** Pablo San Martín (Baseline) / RORCH (Reconciliación y Perfeccionamiento)  
+**Fecha de actualización:** 30 de octubre de 2026  
+**Versión:** `2026-10-30.RUN_008_RECONCILED`  
+**Estado:** `ACTUALIZACIÓN CANÓNICA INTEGRADA / RUN_008`  
+**Documentos rectores:** `KTMA_HOJA_DE_RUTA_20261021_PABLO_SAN_MARTIN.md`, `KT_MovemAcc_ROADMAP_20261030.md`  
+**Raíz:** `C:\01. GitHub\Kumquat.TECH\KT.MovemAcc`
 
-## 1. Propósito y límites
+---
 
-MR0 es el **registro operativo maestro** del trabajo: identifica responsables, estado real, dependencias, impedimentos, evidencias y siguiente acción. No sustituye la hoja de ruta (dirección estratégica), `HO.1` (continuidad y recuperación), `QA.md` (preguntas/respuestas), `QA_Resume.md` (acuerdos vigentes) ni el futuro `ACC_FM_Sync.md` (criterios de traspaso contable al Funding Memo).
+## 1. Propósito, límites y conservación histórica
 
-Los hechos atribuidos a RORCH o SPECIALIST son **resultados informados**, no constataciones directas de este documento. Está prohibido elevar una declaración `SUCCESS` a cumplimiento global sin evidencia suficiente.
+MR0 es el **registro operativo maestro** del trabajo: identifica responsables, estado real, dependencias, impedimentos, evidencias y siguiente acción. No sustituye la hoja de ruta (dirección estratégica), `HO.1` (continuidad y recuperación), `QA.md` (preguntas/respuestas), `QA_Resume.md` (acuerdos vigentes) ni el contrato contable de traspaso al Funding Memo.
 
-## 2. Reglas de autoridad
+**Regla de conservación:** Esta versión perfeccionada integra el baseline histórico de Pablo San Martín (21-10-2026) con el Roadmap actualizado (30-10-2026) y las métricas del estado funcional RUN_008, **sin eliminar ni desnaturalizar** el contenido histórico útil.
 
-**HUMAN (Pablo San Martín):** aprueba criterios económicos, modificaciones protegidas, limpieza con efectos sobre archivos y cierre de hitos financieros.  
-**MORCH:** integra decisiones, ordena dependencias y propone el siguiente trabajo.  
-**RORCH (DSH):** orquesta la ejecución técnica y la formalización documental autorizada.  
-**SPECIALIST (Codex Desktop + NTV):** investiga correspondencias financieras con evidencia reproducible; no representa al asistente de esta conversación.  
-**Verificador independiente:** contrasta resultados con un mecanismo suficientemente separado y documenta limitaciones.
+---
 
-**Puntos de aprobación:** `RM-GATE-003=ABIERTO` (fase 1 y fase 1.5), `RM-GATE-004=ABIERTO` (Funding Memo, fase 2).
+## 2. Reglas de autoridad y gobernanza de decisores
 
-## 3. Estado ejecutivo
+* **HUMAN (Pablo San Martín):** aprueba criterios económicos, modificaciones protegidas, limpieza con efectos sobre archivos y cierre de hitos financieros (`RM-GATE-003`, `RM-GATE-004`).
+* **MORCH:** integra decisiones, ordena dependencias y propone el siguiente trabajo.
+* **RORCH (DSH):** orquesta la ejecución técnica, la formalización documental autorizada y la aplicación constante del contrato NTV/CIRL.
+* **SPECIALIST / Ejecutores:** investigan correspondencias financieras con evidencia reproducible.
+* **Puntos de aprobación vigentes:** `RM-GATE-003=ABIERTO` (Fase 1 y 1.5), `RM-GATE-004=ABIERTO` (Funding Memo, Fase 2). Sin aprobación financiera productiva automática.
 
-| Elemento | Situación al corte | Calidad de evidencia | Próximo paso |
-|---|---|---|---|
-| Hoja de ruta | Aprobada por HUMAN en esta conversación | Aprobación HUMAN; instalación no comprobada | Confrontar con hoja de ruta canónica y promover conservando histórico |
-| `QA.md` | Instalación oficial declarada por RORCH (NTV011) | Informada; hashes declarados iguales | Verificar referencias y custodia |
-| `QA_Resume.md` | Instalación oficial declarada por RORCH (NTV011) | Informada; hashes declarados iguales | Verificar consistencia |
-| `QA_SKILLS.MovemACC_QA.md` | Descubrimiento y prueba de carga informados por RORCH | Informada | Confirmar vigencia de las normas y compatibilidad |
-| Raíz del proyecto | **Discrepancia entre reportes** | No reconciliada | Inventario independiente de rutas reales y rutas malformadas |
-| Fase 1 | Motor autónomo informado; prueba nativa Windows/octubre pendiente | Parcial | Ensayo sin sobrescribir salidas aceptadas |
-| Fase 1.5 | 32 fallos de comparación abiertos | Causa semántica informada, fallos siguen vigentes | Resolver criterio y repetir controles |
-| Correspondencia al Funding Memo | 72 destinos: 15 verificados técnicamente, 18 ambiguos, 37 sin asignación, 2 propuestos | SPECIALIST_003; ninguna aprobación económica | Consolidar decisiones D01–D08 |
-| `ACC_FM_Sync.md` | Previsto; no creado ni aprobado | Planeado | Diseñar borrador trazable |
-| Versión distribuible | Pendiente | Planeado | Ejecutar después de aceptación financiera y pruebas nativas |
+---
 
-## 4. Registro maestro de frentes y tareas
+## 3. Estado funcional y métricas de convergencia (RUN_008)
 
-Los códigos entre paréntesis mantienen la trazabilidad de la hoja de ruta; el nombre legible es la referencia principal.
+Con base en la convergencia técnica reportada hasta RUN_008 (`experiment/ktma-financial-convergence-087`, HEAD `bb9c19f9b36b74df3b4f4f00a1579a9aee5fa58e`):
 
-| Prioridad | Frente / código | Responsable | Estado | Requisito para completar | Siguiente acción |
-|---|---|---|---|---|---|
-| 0 | Hoja de ruta única (`RM-ROAD-001`) | RORCH | Pendiente de instalación comprobada | Versión aprobada identificada; histórico intacto; referencias correctas | Comparar versiones; preparar promoción autorizada |
-| 0 | Integridad documental (`RM-DOC-003`) | RORCH | Parcial | Índices, presentación del proyecto, QA, hoja de ruta y continuidad compatibles | Auditar referencias sin reescribir decisiones |
-| 0 | Inventario físico (`RM-ROOT-001`) | RORCH + verificador | Crítico, pendiente | Lista recursiva con rutas reales, cantidades, hashes y alcance | Conciliar afirmaciones contradictorias |
-| 0 | Clasificación y conservación (`RM-ROOT-002`) | RORCH | Depende de inventario | Cada artefacto clasificado con dueño y plazo de conservación | Separar evidencia, herramientas, pruebas y desconocidos |
-| 0 | Cuarentena reversible (`RM-ROOT-003`) | RORCH + HUMAN | Sin autorización específica | Lista de rutas, hashes, destino y reversión aprobados | Proponer plan; **no mover ni borrar todavía** |
-| 0 | Verificación de limpieza (`RM-QA-001`) | Verificador | Pendiente | Contraste independiente antes/después | Validar ausencia de pérdidas, escapes y rutas inválidas |
-| 0 | Base histórica de fase 1 (`RM-PH1-002`) | RORCH + HUMAN | Bloqueada | Disposición explícita del hash histórico aceptado | Determinar si los bytes originales pueden recuperarse |
-| 0 | Diferencias fase 1/1.5 (`RM-PH15-001`) | SPECIALIST + HUMAN | 32 fallos abiertos | Regla semántica autorizada + nuevos resultados reproducibles | Resolver padres y subtotales de Impulsa |
-| 0 | Relación cuenta–partida (`RM-FM-001`) | SPECIALIST | Parcial | Evidencia contable por celda, signos, medidas, no duplicación | Resolver ambigüedades y excepciones |
-| 0 | Criterios de traspaso (`RM-FM-002`) | SPECIALIST redacta; HUMAN aprueba | Planeado | `ACC_FM_Sync.md` aprobado con matriz versionada | Preparar borrador, sin declararlo oficial |
-| 1 | Ensayo nativo Windows (`RM-PH1-001`) | RORCH | Pendiente | Entradas reales y salidas aisladas, misma conciliación | Planear ejecución autorizada |
-| 1 | Poblamiento de Funding Memo (`RM-FM-003`) | RORCH | Bloqueado por aprobación | Mapeos HUMAN aprobados y copia controlada | No escribir |
-| 1 | Pruebas de aceptación (`RM-UAT-001`) | Verificador + HUMAN | Pendiente | Comparadores positivos/negativos y evidencia financiera | Diseñar oráculos |
-| 2 | Programa distribuible (`RM-REL-001`) | RORCH | Futuro | Operación autónoma validada | No anticipar empaquetado |
-
-## 5. Decisiones y cuestiones abiertas
-
-**Aprobadas por HUMAN:** la hoja de ruta vigente; los tres documentos QA; el corte temporal contable. Cada mayor refleja movimientos acumulados desde el día 0 del proyecto hasta las 23:59 del último día del período; para agosto 2026, hasta el 31-08-2026 23:59.
-
-**Sin aprobación financiera:** 15 relaciones técnico-contables no equivalen a autorizaciones de uso; 18 ambiguas, 37 no asignadas, 2 propuestos; quedan ocho principios económicos por resolver: reconocimiento temporal, distribución entre entidades, partición de construcción, partición de financiamiento, cuatro casos originales Eplaza, supuestos comerciales, IVA/comisiones/capital preferente, y capital/rentabilidad.
-
-**Pendientes de autorización de archivos:** cuarentena de rutas malformadas y traslado de pruebas que hoy constan en informes como ubicadas en `BACKUPS`. Un candado de Excel activo no debe eliminarse.
-
-## 6. Riesgos y condiciones de detención
-
-| Riesgo | Consecuencia | Respuesta exigida |
+| Métrica / Elemento | Valor / Estado | Significado y alcance |
 |---|---|---|
-| RORCH declaró cero rutas malformadas; SPECIALIST reportó 32 | Limpieza falsamente certificada | Inventario con el mismo alcance y comparación de rutas físicas |
-| Pruebas dentro de `BACKUPS` | Confusión entre respaldo y derivado | Clasificar antes de trasladar |
-| Falta de archivo histórico aceptado de fase 1 | Comparación no concluyente | Preservar divergencia y solicitar resolución HUMAN |
-| 32 fallos semánticos | Agregación contable potencialmente incorrecta | No convertirlos en aprobaciones |
-| Diferencia entre suma acumulada y saldo contable neto | Error de interpretación del Funding Memo | Conservar definición temporal y especificar medida por partida |
-| Mapeos sin aprobación | Traspaso económico incorrecto | Bloquear escritura de fase 2 |
-| Descargas temporales | Pérdida de evidencia única | Copiar al depósito durable antes de su vencimiento |
-| Cambios no autorizados a Git o datos | Pérdida de integridad | Detener frente afectado y registrar diferencia |
+| Cuentas contables consolidadas | 253 | Universo de ID de cuentas en CAM (Eplaza + Impulsa). |
+| Cuentas asignadas al Funding Memo | 66 | Vínculos definidos hacia partidas del FM (versión de mapping 1.0.1). |
+| Cuentas sin asignar (`SIN_ASIGNACION_FM`) | 187 | Cuentas visibles, pendientes de clasificación y materialidad. |
+| Destinos FM (Celdas E/F) | 72 | 36 filas lógicas × 2 entidades (Eplaza y Impulsa). |
+| Filas lógicas FM | 36 | Estructura total de filas del Funding Memo. |
+| Filas FM mapeadas con cálculo | 16 | Partidas FM con totales D calculados (16/16 totales calculados en RUN_008). |
+| Contribuciones de valor / Ceros verificados | 64 valores / 68 ceros | `ZERO_VERIFIED` bajo oráculo de cobertura y ausencia exacta de ID. |
+| Pruebas de regresión / QA de artefacto | 42 PASS / 19 PASS | Pruebas unitarias/regresión y artefactos validados (Excel COM CalculateFullRebuild PASS). |
 
-## 7. Próximo ciclo de trabajo: secuencia y simultaneidad
+---
 
+## 4. Contrato financiero y reglas de negocio MR0
+
+1. **Origen numérico exclusivo:** `TOTAL.VALORES_UF` por ID contable, conservando el signo original.
+2. **Dimensión de entidad:** FM columna **E = Eplaza**, columna **F = Impulsa**, columna **D = total horizontal E + F** para las partidas correspondientes.
+3. **Cardinalidad y coeficientes:** Cada ID contable alimenta como máximo una partida FM (`1:1` o `N:1`), aplicando coeficiente `s(a) ∈ {+1, −1}`.
+4. **Corte temporal:** Los reportes mensuales acumulados consideran el origen del proyecto hasta las 23:59 del cierre correspondiente.
+5. **Gobernanza de modificaciones (Mapping):** Las asignaciones de cuentas no deben contener montos históricos fijos. Cada cambio futuro instruido por Gerencia o Directorio se registra en un historial append-only con:
+   `ACCOUNT_ID`, `ACCOUNT_NAME`, `FM_TARGET_ID`, `FM_TARGET_NAME`, `COEFFICIENT`, `ENTITY_CONTRIBUTIONS`, `MAPPING_VERSION`, `APPROVAL_STATUS`, `DECISION_AUTHORITY`, `DECISION_REFERENCE`, `VALID_FROM`, `VALID_TO`, `CHANGE_HISTORY`.
+
+---
+
+## 5. Excepciones financieras vigentes
+
+* **IVA construcción:** Cuentas `120971` y `120973`; tratamiento pendiente de confirmación con el contador (no multiplicar automáticamente por 1.19).
+* **Cuenta 121031:** Alcance comercial pendiente de perfeccionamiento.
+* **Cuenta 410457:** Software con asignación provisional.
+* **Crédito especial IVA (`120972`):** Signo negativo conservado provisionalmente.
+* **Casos TASK060:** 32 discrepancias semánticas resueltas técnicamente, pendientes de aceptación contable final por HUMAN.
+* **Gates RM-GATE-003 / RM-GATE-004:** Abiertos hasta formalización ejecutiva.
+
+---
+
+## 6. Registro maestro de frentes, WBS y tareas (DAG)
+
+| Prioridad / Módulo | Frente / WBS | Responsable | Estado | Siguiente oráculo / acción |
+|---|---|---|---|---|
+| P0 | Reconciliación MR0 (`RM-DOC-001`) | RORCH | **Completado (RUN_008)** | Integración canónica con Roadmap y HO.1 |
+| P0 | Higiene Root / CIRL (`RM-ROOT-001`) | RORCH | Activo (NTV/CIRL) | Mantener delta limpio, RAW inmutable, OUTPUT controlado |
+| P1 | WARN / Auditoría (`RM-AUD-001`) | RORCH + HUMAN | 11 vinculados, 18 pendientes | Adjudicación de los 18 WARN restantes |
+| P1 | Reconciliación TASK060 (`RM-REC-001`) | SPECIALIST + Finanzas | Confligido / Técnico resuelto | Matriz caso a caso con oráculo independiente |
+| P2 | Contrato Funding Memo (`RM-PH2-001`) | HUMAN + Finanzas | Diseño / Gated (RM-GATE-004) | Aprobación de reglas NTV010 y mapeo definitivo |
+| P2 | QA y Regresión (`RM-QA-001`) | Verificador | 42/42 PASS | Pruebas de integración mensual |
+
+---
+
+## 7. Diagramas de arquitectura y flujo (Mermaid)
+
+### 7.1 Flujo de datos y transformación
 ```mermaid
 flowchart LR
-  A["Confirmar hoja de ruta aprobada y documentación oficial"] --> B["Comprobar inventario físico de archivos"]
-  B --> C["Clasificar y proponer limpieza reversible"]
-  C --> D["Solicitar autorización de Pablo para movimientos"]
-  D --> E["Ejecutar únicamente movimientos aprobados"]
-  E --> F["Verificación independiente"]
-  A --> G["Revisar diferencias contables y relación con Funding Memo"]
-  G --> H["Preparar criterios para ACC_FM_Sync.md"]
-  H --> I["Solicitar aprobación económica de Pablo"]
+    RAW["RAW.INPUT\n(Inmutable)"] --> CAM["PH1 · CAM\n(Eplaza + Impulsa)"]
+    CAM --> SQL["PH1.5 · SQLite\n(Linaje y consulta)"]
+    SQL --> MAP["PH2 · Mapping v1.0.1\n(66 cuentas → 16 partidas)"]
+    MAP --> FM["OUTPUT · Funding Memo\n(72 celdas E/F / 36 filas)"]
+    CAM -.-> QA["QA & Excel COM\n(42 PASS)"]
+    MAP -.-> QA
 ```
 
-Los análisis de solo lectura del frente financiero pueden realizarse paralelamente con el inventario documental. Las operaciones sobre archivos y finanzas requieren autorizaciones específicas.
+### 7.2 Gobernanza y versionado de asignaciones
+```mermaid
+flowchart TB
+    DEC["Decisión Gerencia / Directorio"] --> REG["Registro Append-Only\n(Autoridad, Ref, Vigencia)"]
+    REG --> VER["Nueva Versión de Mapping\n(Ej. v1.0.2)"]
+    VER --> REC["Recálculo Automatizado\n(CAM → FM)"]
+    REC --> EVID["Evidencia de Cambio\n(Trazabilidad de deltas)"]
+```
 
-## 8. Contrato de cierre del ciclo
+---
 
-La actualización de MR0 exige: identificación del responsable, archivos de entrada y huellas, pruebas ejecutadas y omitidas, evidencia duradera, cambios realizados, excepciones, decisión HUMAN si corresponde y siguiente acción segura.
+## 8. Relaciones documentales y control de versiones
 
-**No declarar la raíz limpia por el solo resultado de NTV011. No cerrar `RM-GATE-003` ni `RM-GATE-004`. No comprometer cambios a Git sin autorización.**
-
-## 9. Relaciones documentales
-
-- **Hoja de ruta:** dirección, componentes, dependencias y etapas.
-- **MR0 (este archivo):** situación operativa de cada frente, impedimentos y próximas acciones.
-- **HO.1:** instrucciones para retomar el trabajo de manera segura.
-- **QA.md:** historial de preguntas y respuestas aprobadas.
-- **QA_Resume.md:** decisiones vigentes y asuntos pendientes.
-- **Skill interna QA:** gobernanza del historial y su resumen.
-- **ACC_FM_Sync.md:** documento futuro de criterios contables para poblar el Funding Memo; no creado.
-- **Registros de SPECIALIST:** evidencia técnica de correspondencias y discrepancias; no sustituyen aprobaciones.
-
-## 10. Control de versión
-
-Documento redactado a partir de la hoja de ruta aprobada y de mensajes de resultados de RORCH/SPECIALIST. **Pendiente confrontarlo con el MR0 canónico que exista en la raíz local** antes de sustituir archivos; no se verificó el inventario local desde esta sesión. La aprobación de la hoja de ruta no implica por sí sola aprobación de este MR0.
+* **Hoja de Ruta / Roadmap:** Dirección estratégica, fases y dependencias.
+* **MR0 (Este documento):** Estado operativo maestro, frentes, métricas RUN_008 y gobernanza.
+* **HO.1:** Continuidad, recuperación y recuperación de worktree.
+* **QA.md / QA_Resume.md:** Preguntas, respuestas y acuerdos vigentes.
+* **Control de versión:** Perfeccionado y unificado para reflejar fielmente RUN_008 y las directivas de autonomía de RORCH.
