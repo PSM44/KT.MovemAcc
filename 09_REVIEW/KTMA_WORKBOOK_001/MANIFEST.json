@@ -1,0 +1,60 @@
+{
+  "review_id": "KTMA_WORKBOOK_001",
+  "created_at": "2026-10-30T21:29:56.778120Z",
+  "period": "2026.08",
+  "entities": [
+    "EPLAZA",
+    "IMPULSA"
+  ],
+  "artifacts": [
+    {
+      "filename": "REJECTED_BASELINE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
+      "sha256": "a6682bc22da9163490f3cf321aa20901da2d19c744ea3450188babda6ed23618",
+      "size_bytes": 57901,
+      "modified": "2026-10-30T18:22:26.658674",
+      "type": "REJECTED_BASELINE"
+    },
+    {
+      "filename": "PH1_REFERENCE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
+      "sha256": "5fec70a7e5cbb51c96034fa2fb989e5ee07b007ad6b493f5d66d62cd839b6a74",
+      "size_bytes": 165877,
+      "modified": "2026-10-30T18:22:50.449355",
+      "type": "PH1_REFERENCE"
+    },
+    {
+      "filename": "CANDIDATE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
+      "sha256": "45aac4c7f20cdca5308c2a55cecb484c287ca8c99bd85f51353508bce3559e84",
+      "size_bytes": 264195,
+      "modified": "2026-10-30T18:29:46.442003",
+      "type": "CANDIDATE"
+    },
+    {
+      "filename": "canonical_workbook.py",
+      "sha256": "963367288cf8ee71138008bff7a322d95d891ee66a28b29fa8713bfc600b7e37",
+      "size_bytes": 7909,
+      "modified": "2026-10-30T18:23:01.521665",
+      "type": "SOURCE_CODE"
+    },
+    {
+      "filename": "path_guardian.py",
+      "sha256": "410bcfab55d8fe8aeafc96d450803c7a157cb7ebdeb4f14d9cee4c34e309df8a",
+      "size_bytes": 3939,
+      "modified": "2026-10-30T18:23:06.248034",
+      "type": "SOURCE_CODE"
+    },
+    {
+      "filename": "closure_bot.py",
+      "sha256": "2dc8758235dc2d55c7630be589d65a888461d99f8093858c732fdce52690bad4",
+      "size_bytes": 5222,
+      "modified": "2026-10-30T18:23:12.442581",
+      "type": "SOURCE_CODE"
+    },
+    {
+      "filename": "test_canonical_workbook.py",
+      "sha256": "0231d3f0d8ab43d885d34af539575697f346066cce03ac3db0594f15af77c38c",
+      "size_bytes": 2460,
+      "modified": "2026-10-30T18:23:26.541433",
+      "type": "SOURCE_CODE"
+    }
+  ]
+}

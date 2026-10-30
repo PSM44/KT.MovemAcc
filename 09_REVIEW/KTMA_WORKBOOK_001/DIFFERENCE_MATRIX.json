@@ -1,0 +1,65 @@
+{
+  "review_id": "KTMA_WORKBOOK_001",
+  "period": "2026.08",
+  "entities": [
+    "EPLAZA",
+    "IMPULSA"
+  ],
+  "rejected_workbook": "REJECTED_BASELINE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
+  "reference_workbook": "PH1_REFERENCE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
+  "structural_differences": [
+    {
+      "category": "Data Source",
+      "rejected": "Queries account_observations table (empty/null data)",
+      "reference": "Queries consolidated_balances and original_source_rows tables (rich data)",
+      "severity": "CRITICAL",
+      "impact": "All financial data columns are NULL/0 in rejected workbook"
+    },
+    {
+      "category": "Source Sheets (Eplaza/Impulsa)",
+      "rejected": "288/143 rows but Account Code, Semantic Key, Label all NULL; Debit/Credit/Value all 0",
+      "reference": "288/143 rows with full account codes, descriptions, debit/credit/values in UF and CLP",
+      "severity": "CRITICAL",
+      "impact": "Source traceability completely lost"
+    },
+    {
+      "category": "Consolidation Sheet",
+      "rejected": "430 rows (Entity + 4 NULL columns + 0 Value UF)",
+      "reference": "2150 rows with full aligned consolidation: account_code, semantic_key, heading, eplaza/impulsa descriptions, values in UF/CLP per entity + totals, evidence JSON",
+      "severity": "CRITICAL",
+      "impact": "PH1 aligned consolidation not represented; vertical representation degrades utility"
+    },
+    {
+      "category": "FM Mapping Sheet",
+      "rejected": "50 rows (LIMIT 50), generic \"FM Part E/F Standard\", no real FM target IDs, all values 0",
+      "reference": "Not in reference (PH1 scope); requires proper FM v1.0.1 mapping from funding_memo.py",
+      "severity": "HIGH",
+      "impact": "FM designations generic, no source ID traceability"
+    },
+    {
+      "category": "Audit Sheet",
+      "rejected": "5 static rows, superficial controls only",
+      "reference": "Not in reference; needs functional audit with real validation results",
+      "severity": "MEDIUM",
+      "impact": "Audit reduced to superficial controls"
+    },
+    {
+      "category": "Query/Navigation Sheet",
+      "rejected": "430 rows, all account codes NULL, no filters, no structured tables",
+      "reference": "Not in reference; needs Excel 365 structured tables with filters",
+      "severity": "HIGH",
+      "impact": "Queries non-operational, no navigation, no filters"
+    }
+  ],
+  "functional_deficiencies": [
+    "Accounts without identifiers or descriptions (account_code, semantic_key, label all NULL)",
+    "Vertical representation degrades aligned consolidation (entities as rows instead of columns)",
+    "FM designations generic without source ID (\"FM Part E/F Standard\" vs actual FM targets)",
+    "Audit reduced to superficial controls (static PASS/OPEN without evidence)",
+    "Queries non-operational (no filters, no structured tables, no navigation)",
+    "Missing CLP values (only UF in rejected, both UF and CLP in reference)",
+    "Missing heading/hierarchy context (critical for financial statement structure)",
+    "Missing evidence traceability (no evidence_json linking to source rows)"
+  ],
+  "root_cause": "canonical_workbook.py queries account_observations table which contains 429 rows but all with NULL account_code, semantic_key, label and 0 values. The PH1 data exists in consolidated_balances (aligned) and original_source_rows (raw sources)."
+}
