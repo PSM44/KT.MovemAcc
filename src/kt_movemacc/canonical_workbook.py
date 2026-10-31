@@ -93,6 +93,7 @@ def generate_canonical_financial_workbook(
         table1 = Table(displayName="Tbl_Eplaza_Source", ref=f"A1:{get_column_letter(len(headers1))}{ws1.max_row}")
         table1.tableStyleInfo = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws1.add_table(table1)
+        ws1.auto_filter.ref = table1.ref
 
     # ============================================================
     # 2. Sheet: 02_Sources_Impulsa (from original_source_rows)
@@ -144,6 +145,7 @@ def generate_canonical_financial_workbook(
         table2 = Table(displayName="Tbl_Impulsa_Source", ref=f"A1:{get_column_letter(len(headers2))}{ws2.max_row}")
         table2.tableStyleInfo = TableStyleInfo(name="TableStyleMedium9", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws2.add_table(table2)
+        ws2.auto_filter.ref = table2.ref
 
     # ============================================================
     # 3. Sheet: 03_Consolidated_PH1 (from consolidated_balances) - HORIZONTAL ALIGNED
@@ -160,7 +162,7 @@ def generate_canonical_financial_workbook(
         SELECT cb.*
         FROM consolidated_balances cb
         JOIN accounting_periods ap ON cb.period_id = ap.period_id
-        WHERE ap.period_code = '2026.08' AND cb.row_type = 'ACCOUNT'
+        WHERE ap.period_code = '2026.08' AND cb.row_type IN ('ACCOUNT', 'HEADING')
         ORDER BY cb.consolidated_id
     """).fetchall()
     
@@ -187,6 +189,7 @@ def generate_canonical_financial_workbook(
         table3 = Table(displayName="Tbl_Consolidated_PH1", ref=f"A1:{get_column_letter(len(headers3))}{ws3.max_row}")
         table3.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws3.add_table(table3)
+        ws3.auto_filter.ref = table3.ref
 
     # ============================================================
     # 4. Sheet: 04_FM_Mapping (from funding_memo.py mapping rules)
@@ -264,6 +267,7 @@ def generate_canonical_financial_workbook(
         table4 = Table(displayName="Tbl_FM_Mapping", ref=f"A1:{get_column_letter(len(headers4))}{ws4.max_row}")
         table4.tableStyleInfo = TableStyleInfo(name="TableStyleMedium4", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws4.add_table(table4)
+        ws4.auto_filter.ref = table4.ref
 
     # ============================================================
     # 5. Sheet: 05_Audit (Functional Audit with real validation)
@@ -315,7 +319,7 @@ def generate_canonical_financial_workbook(
     
     # Coverage check: all consolidated accounts mapped?
     mapped_account_ids = set(rule.account_id for rule in rules)
-    unmapped_accounts = [r["account_code"] for r in consol_rows if r["account_code"] not in mapped_account_ids and (float(r["eplaza_value_uf"] or 0) != 0 or float(r["impulsa_value_uf"] or 0) != 0)]
+    unmapped_accounts = [r["account_code"] for r in consol_rows if r["account_code"] and r["account_code"] not in mapped_account_ids and (float(r["eplaza_value_uf"] or 0) != 0 or float(r["impulsa_value_uf"] or 0) != 0)]
     
     audit_items = [
         ("RAW.INPUT Source Integrity (SHA-256)", "Source Integrity", 

@@ -1,0 +1,55 @@
+{
+  "workbook_opened": true,
+  "sheets_verified": [
+    {
+      "name": "01_Sources_Eplaza",
+      "rows": 288,
+      "cols": 15,
+      "has_structured_table": true,
+      "table_name": "Tbl_Eplaza_Source",
+      "auto_filter": false
+    },
+    {
+      "name": "02_Sources_Impulsa",
+      "rows": 143,
+      "cols": 15,
+      "has_structured_table": true,
+      "table_name": "Tbl_Impulsa_Source",
+      "auto_filter": false
+    },
+    {
+      "name": "03_Consolidated_PH1",
+      "rows": 1772,
+      "cols": 14,
+      "has_structured_table": true,
+      "table_name": "Tbl_Consolidated_PH1",
+      "auto_filter": false
+    },
+    {
+      "name": "04_FM_Mapping",
+      "rows": 133,
+      "cols": 23,
+      "has_structured_table": true,
+      "table_name": "Tbl_FM_Mapping",
+      "auto_filter": false
+    },
+    {
+      "name": "05_Audit",
+      "rows": 13,
+      "cols": 6,
+      "has_structured_table": true,
+      "table_name": "Tbl_Audit",
+      "auto_filter": false
+    }
+  ],
+  "calculations_verified": true,
+  "queries_refreshed": true,
+  "spreadsheet_inquire_available": true,
+  "spreadsheet_inquire_results": {
+    "available": true,
+    "comparison_run": false,
+    "reason": "Reference workbook needed for comparison"
+  },
+  "errors": [],
+  "warnings": []
+}
