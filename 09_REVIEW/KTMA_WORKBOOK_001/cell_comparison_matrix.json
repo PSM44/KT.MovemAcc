@@ -1,0 +1,284 @@
+{
+  "ph1_sheets": [
+    "01_Eplaza_Source",
+    "02_Impulsa_Source",
+    "03_Consolidated_PH1"
+  ],
+  "candidate_sheets": [
+    "01_Sources_Eplaza",
+    "02_Sources_Impulsa",
+    "03_Consolidated_PH1",
+    "04_FM_Mapping",
+    "05_Audit",
+    "06_Query_Table",
+    "07_FM_Targets_Summary"
+  ],
+  "sheet_comparisons": {
+    "03_Consolidated_PH1": {
+      "common_cell_count": 16629,
+      "only_in_ph1_count": 4922,
+      "only_in_cand_count": 3720,
+      "mismatch_count": 11093,
+      "mismatches_sample": [
+        {
+          "coord": "B1584",
+          "ph1_value": "120897",
+          "candidate_value": "120959"
+        },
+        {
+          "coord": "H1001",
+          "ph1_value": 2403.58,
+          "candidate_value": 0
+        },
+        {
+          "coord": "L603",
+          "ph1_value": "{\"eplaza_source_row\": null, \"impulsa_source_row\": 102, \"key\": \"410425\"}",
+          "candidate_value": 128
+        },
+        {
+          "coord": "H1717",
+          "ph1_value": -12.65,
+          "candidate_value": 4.73
+        },
+        {
+          "coord": "I136",
+          "ph1_value": 17604147,
+          "candidate_value": 0
+        },
+        {
+          "coord": "H54",
+          "ph1_value": 180096.35,
+          "candidate_value": 20
+        },
+        {
+          "coord": "K1580",
+          "ph1_value": 0,
+          "candidate_value": 165790537
+        },
+        {
+          "coord": "F153",
+          "ph1_value": 749974,
+          "candidate_value": -35.78
+        },
+        {
+          "coord": "I574",
+          "ph1_value": -58427829,
+          "candidate_value": 12897285
+        },
+        {
+          "coord": "H143",
+          "ph1_value": 86.74,
+          "candidate_value": -47267
+        },
+        {
+          "coord": "K727",
+          "ph1_value": 150542855,
+          "candidate_value": 0
+        },
+        {
+          "coord": "I1530",
+          "ph1_value": 0,
+          "candidate_value": 4284000
+        },
+        {
+          "coord": "A922",
+          "ph1_value": "470111",
+          "candidate_value": "310112"
+        },
+        {
+          "coord": "B9",
+          "ph1_value": "VALORES NEGOCIABLES#2",
+          "candidate_value": "110521"
+        },
+        {
+          "coord": "J1117",
+          "ph1_value": -794497224,
+          "candidate_value": 0
+        },
+        {
+          "coord": "D415",
+          "ph1_value": "Honorarios Publicista",
+          "candidate_value": "Perdidas y Ganancias"
+        },
+        {
+          "coord": "L35",
+          "ph1_value": "{\"eplaza_source_row\": 37, \"impulsa_source_row\": 26, \"key\": \"INVERSION EMPRESA RELACIONADA#1\"}",
+          "candidate_value": 50
+        },
+        {
+          "coord": "F1416",
+          "ph1_value": -326.15,
+          "candidate_value": 0
+        },
+        {
+          "coord": "L1720",
+          "ph1_value": "{\"eplaza_source_row\": 192, \"impulsa_source_row\": null, \"key\": \"220112\"}",
+          "candidate_value": 263
+        },
+        {
+          "coord": "B1008",
+          "ph1_value": "120961",
+          "candidate_value": "410461"
+        },
+        {
+          "coord": "I1074",
+          "ph1_value": 29864386010,
+          "candidate_value": 165790537
+        },
+        {
+          "coord": "I365",
+          "ph1_value": 19440877,
+          "candidate_value": 3455499
+        },
+        {
+          "coord": "L426",
+          "ph1_value": "{\"eplaza_source_row\": 124, \"impulsa_source_row\": null, \"key\": \"121027\"}",
+          "candidate_value": 233
+        },
+        {
+          "coord": "G616",
+          "ph1_value": 65.69,
+          "candidate_value": 0
+        },
+        {
+          "coord": "D95",
+          "ph1_value": "Demolicion y Obras Exteriores",
+          "candidate_value": "Soporte y Mantencion Informatica"
+        },
+        {
+          "coord": "B269",
+          "ph1_value": "IMPULSA_ONLY",
+          "candidate_value": "110811"
+        },
+        {
+          "coord": "B165",
+          "ph1_value": "210412",
+          "candidate_value": "310116"
+        },
+        {
+          "coord": "A1137",
+          "ph1_value": "310117",
+          "candidate_value": "210411"
+        },
+        {
+          "coord": "I821",
+          "ph1_value": -260515719,
+          "candidate_value": 165790537
+        },
+        {
+          "coord": "I939",
+          "ph1_value": 4284000,
+          "candidate_value": 0
+        },
+        {
+          "coord": "F1557",
+          "ph1_value": 16287.48,
+          "candidate_value": 3600.07
+        },
+        {
+          "coord": "L155",
+          "ph1_value": "{\"eplaza_source_row\": 162, \"impulsa_source_row\": 41, \"key\": \"210111\"}",
+          "candidate_value": 209
+        },
+        {
+          "coord": "K1016",
+          "ph1_value": 67405635,
+          "candidate_value": 8136552
+        },
+        {
+          "coord": "I296",
+          "ph1_value": 0,
+          "candidate_value": 44848884
+        },
+        {
+          "coord": "I328",
+          "ph1_value": 649194033,
+          "candidate_value": 67405635
+        },
+        {
+          "coord": "K150",
+          "ph1_value": 0,
+          "candidate_value": -6879200193
+        },
+        {
+          "coord": "F417",
+          "ph1_value": 785.06,
+          "candidate_value": 0
+        },
+        {
+          "coord": "K944",
+          "ph1_value": 2205412772,
+          "candidate_value": 0
+        },
+        {
+          "coord": "H324",
+          "ph1_value": 0,
+          "candidate_value": 2856.7
+        },
+        {
+          "coord": "D664",
+          "ph1_value": "Dep Acum. Equipo Aire Acondicionado",
+          "candidate_value": "Dividendos Pagados"
+        },
+        {
+          "coord": "F626",
+          "ph1_value": 123276.76,
+          "candidate_value": 0
+        },
+        {
+          "coord": "D1678",
+          "ph1_value": "Gtos Generales Legales Sociedad",
+          "candidate_value": "Utilidades Acumuladas"
+        },
+        {
+          "coord": "E921",
+          "ph1_value": "VPP Inmobiliaria La Espuela",
+          "candidate_value": "Perdidas y Ganancias"
+        },
+        {
+          "coord": "L1039",
+          "ph1_value": "{\"eplaza_source_row\": 123, \"impulsa_source_row\": null, \"key\": \"121026\"}",
+          "candidate_value": 40
+        },
+        {
+          "coord": "B59",
+          "ph1_value": "DERECHOS Y PERMISOS#1",
+          "candidate_value": "120952"
+        },
+        {
+          "coord": "J1110",
+          "ph1_value": -3972733229,
+          "candidate_value": 0
+        },
+        {
+          "coord": "L962",
+          "ph1_value": "{\"eplaza_source_row\": 43, \"impulsa_source_row\": null, \"key\": \"120831\"}",
+          "candidate_value": 264
+        },
+        {
+          "coord": "L544",
+          "ph1_value": "{\"eplaza_source_row\": 247, \"impulsa_source_row\": null, \"key\": \"410439\"}",
+          "candidate_value": 58
+        },
+        {
+          "coord": "B1702",
+          "ph1_value": "210511",
+          "candidate_value": "410432"
+        },
+        {
+          "coord": "K1410",
+          "ph1_value": -505078,
+          "candidate_value": -419025493
+        }
+      ]
+    }
+  },
+  "added_sheets": [
+    "05_Audit",
+    "02_Sources_Impulsa",
+    "01_Sources_Eplaza",
+    "06_Query_Table",
+    "04_FM_Mapping",
+    "07_FM_Targets_Summary"
+  ]
+}
