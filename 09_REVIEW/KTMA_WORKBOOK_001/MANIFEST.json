@@ -1,6 +1,7 @@
 {
   "review_id": "KTMA_WORKBOOK_001",
   "created_at": "2026-10-30T21:29:56.778120Z",
+  "updated_at": "2026-10-31T23:44:00.000000Z",
   "period": "2026.08",
   "entities": [
     "EPLAZA",
@@ -23,16 +24,16 @@
     },
     {
       "filename": "CANDIDATE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
-      "sha256": "45aac4c7f20cdca5308c2a55cecb484c287ca8c99bd85f51353508bce3559e84",
-      "size_bytes": 264195,
-      "modified": "2026-10-30T18:29:46.442003",
+      "sha256": "ae30ea5ac43fe0017d41a0be638dd9bdf41f852fc52303cced9fa83e2cc3d091",
+      "size_bytes": 322656,
+      "modified": "2026-10-31T23:41:18.000000",
       "type": "CANDIDATE"
     },
     {
       "filename": "canonical_workbook.py",
-      "sha256": "963367288cf8ee71138008bff7a322d95d891ee66a28b29fa8713bfc600b7e37",
-      "size_bytes": 7909,
-      "modified": "2026-10-30T18:23:01.521665",
+      "sha256": "ca6385deecb4c3c6283387222ab21e6325fc9d55625d78319eb353f9c9b3ab59",
+      "size_bytes": 27715,
+      "modified": "2026-10-31T23:40:00.000000",
       "type": "SOURCE_CODE"
     },
     {

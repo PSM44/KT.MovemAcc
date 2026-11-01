@@ -402,6 +402,7 @@ def generate_canonical_financial_workbook(
         table5 = Table(displayName="Tbl_Audit", ref=f"A1:{get_column_letter(len(headers5))}{ws5.max_row}")
         table5.tableStyleInfo = TableStyleInfo(name="TableStyleMedium6", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws5.add_table(table5)
+        ws5.auto_filter.ref = table5.ref
 
     # ============================================================
     # 6. Sheet: 06_Query_Table (Excel 365 structured table with filters)
@@ -504,6 +505,7 @@ def generate_canonical_financial_workbook(
         table7 = Table(displayName="Tbl_FM_Targets", ref=f"A1:{get_column_letter(len(headers7))}{ws7.max_row}")
         table7.tableStyleInfo = TableStyleInfo(name="TableStyleMedium10", showFirstColumn=False, showLastColumn=False, showRowStripes=True, showColumnStripes=False)
         ws7.add_table(table7)
+        ws7.auto_filter.ref = table7.ref
 
     conn.close()
 

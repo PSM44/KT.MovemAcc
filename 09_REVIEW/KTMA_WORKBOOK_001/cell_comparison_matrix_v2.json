@@ -6,9 +6,74 @@
     "mismatch_count": 1654,
     "mismatches_sample": [
       {
-        "coord": "J148",
+        "coord": "H71",
+        "ph1": 0,
+        "candidate": 229977591
+      },
+      {
+        "coord": "D178",
+        "ph1": 0,
+        "candidate": "Provision Impuesto a la Renta"
+      },
+      {
+        "coord": "K274",
+        "ph1": "NO",
+        "candidate": "ACCOUNT"
+      },
+      {
+        "coord": "K256",
+        "ph1": "NO",
+        "candidate": "ACCOUNT"
+      },
+      {
+        "coord": "L64",
+        "ph1": 64,
+        "candidate": "SI"
+      },
+      {
+        "coord": "G167",
+        "ph1": 4005939911,
+        "candidate": -6420.41
+      },
+      {
+        "coord": "J271",
         "ph1": "ACCOUNT",
-        "candidate": 3455499
+        "candidate": 0
+      },
+      {
+        "coord": "K239",
+        "ph1": "NO",
+        "candidate": "ACCOUNT"
+      },
+      {
+        "coord": "K231",
+        "ph1": "SI",
+        "candidate": "ACCOUNT"
+      },
+      {
+        "coord": "H57",
+        "ph1": 0,
+        "candidate": 7623882471
+      },
+      {
+        "coord": "D159",
+        "ph1": 771311.28,
+        "candidate": "TOTAL ACTIVO"
+      },
+      {
+        "coord": "D234",
+        "ph1": 0,
+        "candidate": "Reajustes Ganados"
+      },
+      {
+        "coord": "L125",
+        "ph1": 125,
+        "candidate": "SI"
+      },
+      {
+        "coord": "F125",
+        "ph1": 398.31,
+        "candidate": 0
       },
       {
         "coord": "I195",
@@ -16,94 +81,29 @@
         "candidate": 13500000
       },
       {
-        "coord": "D104",
-        "ph1": 0,
-        "candidate": "Bodegas"
-      },
-      {
-        "coord": "G13",
-        "ph1": 6195207719,
-        "candidate": 123276.76
-      },
-      {
-        "coord": "F71",
-        "ph1": 5785.5,
-        "candidate": 0
-      },
-      {
-        "coord": "E129",
-        "ph1": 0,
-        "candidate": 2389.18
-      },
-      {
-        "coord": "L211",
-        "ph1": 211,
-        "candidate": "NO"
-      },
-      {
-        "coord": "I54",
-        "ph1": 21880254760,
-        "candidate": 226958670
-      },
-      {
-        "coord": "F146",
-        "ph1": 1186.58,
-        "candidate": 0
-      },
-      {
-        "coord": "D130",
-        "ph1": 2389.18,
-        "candidate": "Costo Corretaje"
-      },
-      {
-        "coord": "J228",
+        "coord": "J242",
         "ph1": "ACCOUNT",
         "candidate": 0
       },
       {
-        "coord": "G111",
-        "ph1": 196505641,
-        "candidate": 4933.61
-      },
-      {
-        "coord": "J114",
-        "ph1": "ACCOUNT",
-        "candidate": 2619264
-      },
-      {
-        "coord": "K262",
+        "coord": "K248",
         "ph1": "NO",
         "candidate": "ACCOUNT"
       },
       {
-        "coord": "J46",
-        "ph1": "ACCOUNT",
-        "candidate": 0
+        "coord": "L132",
+        "ph1": 132,
+        "candidate": "SI"
       },
       {
-        "coord": "J78",
-        "ph1": "ACCOUNT",
-        "candidate": 4177020
-      },
-      {
-        "coord": "K261",
+        "coord": "K42",
         "ph1": "NO",
-        "candidate": "ACCOUNT"
+        "candidate": "HEADING"
       },
       {
-        "coord": "D117",
-        "ph1": 51.95,
-        "candidate": "Otras Asesorías"
-      },
-      {
-        "coord": "F79",
-        "ph1": 140.94,
+        "coord": "J97",
+        "ph1": "ACCOUNT",
         "candidate": 0
-      },
-      {
-        "coord": "L102",
-        "ph1": 102,
-        "candidate": "NO"
       }
     ]
   },
@@ -114,212 +114,212 @@
     "mismatch_count": 745,
     "mismatches_sample": [
       {
-        "coord": "D104",
+        "coord": "H107",
         "ph1": 0,
-        "candidate": "Asesoria Legal"
+        "candidate": 55000
       },
       {
-        "coord": "F71",
-        "ph1": -70.57,
-        "candidate": 70.57
-      },
-      {
-        "coord": "D130",
-        "ph1": 0,
-        "candidate": "CCMM S/. Capital Propio"
-      },
-      {
-        "coord": "G111",
-        "ph1": 898585,
-        "candidate": 22
-      },
-      {
-        "coord": "J114",
-        "ph1": "ACCOUNT",
+        "coord": "H71",
+        "ph1": 2803782,
         "candidate": 0
       },
       {
-        "coord": "J46",
-        "ph1": "ACCOUNT",
-        "candidate": 0
+        "coord": "E136",
+        "ph1": 121548.59,
+        "candidate": 188707.79
       },
       {
-        "coord": "J78",
-        "ph1": "ACCOUNT",
-        "candidate": 0
-      },
-      {
-        "coord": "D131",
-        "ph1": 0,
-        "candidate": "Diferencia de Cambio"
-      },
-      {
-        "coord": "D117",
-        "ph1": 0,
-        "candidate": "Comisiones Pagadas"
-      },
-      {
-        "coord": "L102",
-        "ph1": 102,
+        "coord": "L64",
+        "ph1": 64,
         "candidate": "NO"
       },
       {
-        "coord": "K83",
-        "ph1": "SI",
-        "candidate": "HEADING"
+        "coord": "H57",
+        "ph1": 129576,
+        "candidate": 114866
       },
       {
-        "coord": "J3",
-        "ph1": "HEADING",
-        "candidate": 2620670
+        "coord": "L125",
+        "ph1": 125,
+        "candidate": "NO"
       },
       {
-        "coord": "I48",
-        "ph1": -639194033,
-        "candidate": 639194033
+        "coord": "L132",
+        "ph1": 132,
+        "candidate": "NO"
       },
       {
-        "coord": "E38",
-        "ph1": 2445.31,
-        "candidate": 167269.99
-      },
-      {
-        "coord": "D118",
-        "ph1": 39.92,
-        "candidate": "Impto Timbre y Estampillas"
-      },
-      {
-        "coord": "J131",
-        "ph1": "ACCOUNT",
-        "candidate": 0
-      },
-      {
-        "coord": "K122",
+        "coord": "K42",
         "ph1": "NO",
         "candidate": "ACCOUNT"
       },
       {
-        "coord": "F58",
-        "ph1": -6,
-        "candidate": 20
+        "coord": "J97",
+        "ph1": "ACCOUNT",
+        "candidate": 0
       },
       {
-        "coord": "L8",
-        "ph1": 8,
+        "coord": "E3",
+        "ph1": 2445.31,
+        "candidate": 2511
+      },
+      {
+        "coord": "L24",
+        "ph1": 24,
         "candidate": "NO"
       },
       {
-        "coord": "J34",
+        "coord": "J53",
         "ph1": "ACCOUNT",
         "candidate": 0
+      },
+      {
+        "coord": "J52",
+        "ph1": "ACCOUNT",
+        "candidate": 0
+      },
+      {
+        "coord": "L22",
+        "ph1": 22,
+        "candidate": "NO"
+      },
+      {
+        "coord": "J117",
+        "ph1": "ACCOUNT",
+        "candidate": 0
+      },
+      {
+        "coord": "I62",
+        "ph1": -801785716,
+        "candidate": 801785716
+      },
+      {
+        "coord": "L131",
+        "ph1": 131,
+        "candidate": "NO"
+      },
+      {
+        "coord": "D24",
+        "ph1": 0,
+        "candidate": "Cta. Cte. Inmob. y Const. Los Laureles SPA"
+      },
+      {
+        "coord": "D41",
+        "ph1": 0,
+        "candidate": "Linea Credito Bco Santander"
+      },
+      {
+        "coord": "H112",
+        "ph1": 0,
+        "candidate": 761317
       }
     ]
   },
   "03_Consolidated_PH1 vs 03_Consolidated_PH1": {
     "ph1_total_cells": 21551,
-    "candidate_total_cells": 20349,
-    "common_cells": 16629,
-    "mismatch_count": 11093,
+    "candidate_total_cells": 24297,
+    "common_cells": 21271,
+    "mismatch_count": 1870,
     "mismatches_sample": [
       {
-        "coord": "L794",
-        "ph1": "{\"eplaza_source_row\": 187, \"impulsa_source_row\": null, \"key\": \"210933\"}",
-        "candidate": 50
+        "coord": "L467",
+        "ph1": "{\"eplaza_source_row\": 167, \"impulsa_source_row\": 44, \"key\": \"210311\"}",
+        "candidate": 167
       },
       {
-        "coord": "B1077",
-        "ph1": "OBLIG. CON BCOS E INST FINANCIERAS#1",
-        "candidate": "120958"
+        "coord": "L62",
+        "ph1": "{\"eplaza_source_row\": 66, \"impulsa_source_row\": null, \"key\": \"120923\"}",
+        "candidate": 66
       },
       {
-        "coord": "A1174",
-        "ph1": "410460",
-        "candidate": "230691"
+        "coord": "L1089",
+        "ph1": "{\"eplaza_source_row\": 175, \"impulsa_source_row\": null, \"key\": \"210513\"}",
+        "candidate": 175
       },
       {
-        "coord": "F1095",
-        "ph1": 0,
-        "candidate": 1151.12
+        "coord": "L1606",
+        "ph1": "{\"eplaza_source_row\": 75, \"impulsa_source_row\": null, \"key\": \"120945\"}",
+        "candidate": 75
       },
       {
-        "coord": "D1285",
-        "ph1": "Contribuciones Bs Rs",
-        "candidate": "Ctas por Cobrar"
+        "coord": "L930",
+        "ph1": "{\"eplaza_source_row\": 10, \"impulsa_source_row\": 9, \"key\": \"VALORES NEGOCIABLES#2\"}",
+        "candidate": 10
       },
       {
-        "coord": "G1395",
-        "ph1": -16042.73,
-        "candidate": 0
+        "coord": "L1759",
+        "ph1": "{\"eplaza_source_row\": 234, \"impulsa_source_row\": 90, \"key\": \"320115\"}",
+        "candidate": 234
       },
       {
-        "coord": "B714",
-        "ph1": "120993",
-        "candidate": "450111"
+        "coord": "L2040",
+        "ph1": "{\"eplaza_source_row\": 205, \"impulsa_source_row\": null, \"key\": \"221411\"}",
+        "candidate": 205
       },
       {
-        "coord": "H957",
-        "ph1": 17.64,
-        "candidate": 23.83
+        "coord": "L705",
+        "ph1": "{\"eplaza_source_row\": 95, \"impulsa_source_row\": null, \"key\": \"120973\"}",
+        "candidate": 95
       },
       {
-        "coord": "B958",
-        "ph1": "120512",
-        "candidate": "410457"
+        "coord": "L2051",
+        "ph1": "{\"eplaza_source_row\": 216, \"impulsa_source_row\": 81, \"key\": \"230691\"}",
+        "candidate": 216
       },
       {
-        "coord": "B772",
-        "ph1": "210123",
-        "candidate": "110564"
+        "coord": "L1913",
+        "ph1": "{\"eplaza_source_row\": 75, \"impulsa_source_row\": null, \"key\": \"120945\"}",
+        "candidate": 75
       },
       {
-        "coord": "B109",
-        "ph1": "121013",
-        "candidate": "121068"
+        "coord": "L1638",
+        "ph1": "{\"eplaza_source_row\": 107, \"impulsa_source_row\": null, \"key\": \"120996\"}",
+        "candidate": 107
       },
       {
-        "coord": "B171",
-        "ph1": "210811",
-        "candidate": "320112"
+        "coord": "L878",
+        "ph1": "{\"eplaza_source_row\": 274, \"impulsa_source_row\": 129, \"key\": \"450511\"}",
+        "candidate": 274
       },
       {
-        "coord": "F1273",
-        "ph1": 0,
-        "candidate": 123276.76
+        "coord": "L1097",
+        "ph1": "{\"eplaza_source_row\": 183, \"impulsa_source_row\": null, \"key\": \"210922\"}",
+        "candidate": 183
       },
       {
-        "coord": "B1404",
-        "ph1": "210922",
-        "candidate": "210935"
+        "coord": "L1115",
+        "ph1": "{\"eplaza_source_row\": 201, \"impulsa_source_row\": 65, \"key\": \"220515\"}",
+        "candidate": 201
       },
       {
-        "coord": "B1617",
-        "ph1": "120956",
-        "candidate": "121041"
+        "coord": "L751",
+        "ph1": "{\"eplaza_source_row\": 142, \"impulsa_source_row\": null, \"key\": \"121065\"}",
+        "candidate": 142
       },
       {
-        "coord": "A261",
-        "ph1": "450113",
-        "candidate": "110511"
+        "coord": "L771",
+        "ph1": "{\"eplaza_source_row\": 164, \"impulsa_source_row\": null, \"key\": \"210121\"}",
+        "candidate": 164
       },
       {
-        "coord": "G1468",
-        "ph1": 1.38,
-        "candidate": 39.92
+        "coord": "L360",
+        "ph1": "{\"eplaza_source_row\": 57, \"impulsa_source_row\": null, \"key\": \"TERRENO#1\"}",
+        "candidate": 57
       },
       {
-        "coord": "A279",
-        "ph1": "210131",
-        "candidate": "120512"
+        "coord": "L409",
+        "ph1": "{\"eplaza_source_row\": 106, \"impulsa_source_row\": null, \"key\": \"120995\"}",
+        "candidate": 106
       },
       {
-        "coord": "H328",
-        "ph1": 180538.22,
-        "candidate": 1696.68
+        "coord": "L1419",
+        "ph1": "{\"eplaza_source_row\": 198, \"impulsa_source_row\": 62, \"key\": \"220512\"}",
+        "candidate": 198
       },
       {
-        "coord": "E1265",
-        "ph1": "Inversion en Inmob. San Juan De La Luz S.A.",
-        "candidate": "VPP Inmobiliaria La Espuela"
+        "coord": "L2024",
+        "ph1": "{\"eplaza_source_row\": 189, \"impulsa_source_row\": 58, \"key\": \"210941\"}",
+        "candidate": 189
       }
     ]
   }

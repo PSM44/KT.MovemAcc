@@ -1,55 +1,32 @@
 {
-  "workbook_opened": true,
-  "sheets_verified": [
-    {
-      "name": "01_Sources_Eplaza",
-      "rows": 288,
-      "cols": 15,
-      "has_structured_table": true,
-      "table_name": "Tbl_Eplaza_Source",
-      "auto_filter": false
-    },
-    {
-      "name": "02_Sources_Impulsa",
-      "rows": 143,
-      "cols": 15,
-      "has_structured_table": true,
-      "table_name": "Tbl_Impulsa_Source",
-      "auto_filter": false
-    },
-    {
-      "name": "03_Consolidated_PH1",
-      "rows": 1772,
-      "cols": 14,
-      "has_structured_table": true,
-      "table_name": "Tbl_Consolidated_PH1",
-      "auto_filter": false
-    },
-    {
-      "name": "04_FM_Mapping",
-      "rows": 133,
-      "cols": 23,
-      "has_structured_table": true,
-      "table_name": "Tbl_FM_Mapping",
-      "auto_filter": false
-    },
-    {
-      "name": "05_Audit",
-      "rows": 13,
-      "cols": 6,
-      "has_structured_table": true,
-      "table_name": "Tbl_Audit",
-      "auto_filter": false
-    }
-  ],
-  "calculations_verified": true,
-  "queries_refreshed": true,
-  "spreadsheet_inquire_available": true,
+  "workbook_opened": false,
+  "sheets_verified": [],
+  "calculations_verified": false,
+  "queries_refreshed": false,
+  "spreadsheet_inquire_available": false,
   "spreadsheet_inquire_results": {
-    "available": true,
+    "available": false,
     "comparison_run": false,
-    "reason": "Reference workbook needed for comparison"
+    "reason": "UNVERIFIED - win32com/pywin32 not available in Linux environment. Excel COM automation requires Windows with Excel installed."
   },
   "errors": [],
-  "warnings": []
+  "warnings": [
+    "UNVERIFIED: Excel COM validation requires Windows environment with Microsoft Excel and pywin32. Current runtime is Linux (WSL2) without Excel COM interface.",
+    "UNVERIFIED: Spreadsheet Inquire add-in verification requires Windows Excel 365 with Inquire add-in installed and licensed.",
+    "All 7 sheets verified structurally via openpyxl: 01_Sources_Eplaza, 02_Sources_Impulsa, 03_Consolidated_PH1, 04_FM_Mapping, 05_Audit, 06_Query_Table, 07_FM_Targets_Summary",
+    "All 7 sheets have structured Excel tables with auto-filters enabled (verified via openpyxl)"
+  ],
+  "verification_environment": "Linux (WSL2) - openpyxl structural verification only",
+  "openpyxl_verification": {
+    "01_Sources_Eplaza": {"rows": 288, "cols": 15, "has_table": true, "table_name": "Tbl_Eplaza_Source", "auto_filter": "A1:O288"},
+    "02_Sources_Impulsa": {"rows": 143, "cols": 15, "has_table": true, "table_name": "Tbl_Impulsa_Source", "auto_filter": "A1:O143"},
+    "03_Consolidated_PH1": {"rows": 2150, "cols": 14, "has_table": true, "table_name": "Tbl_Consolidated_PH1", "auto_filter": "A1:N2150"},
+    "04_FM_Mapping": {"rows": 133, "cols": 23, "has_table": true, "table_name": "Tbl_FM_Mapping", "auto_filter": "A1:W133"},
+    "05_Audit": {"rows": 13, "cols": 6, "has_table": true, "table_name": "Tbl_Audit", "auto_filter": "A1:F13"},
+    "06_Query_Table": {"rows": 1863, "cols": 12, "has_table": true, "table_name": "Tbl_Query", "auto_filter": "A1:L1863"},
+    "07_FM_Targets_Summary": {"rows": 17, "cols": 14, "has_table": true, "table_name": "Tbl_FM_Targets", "auto_filter": "A1:N17"}
+  },
+  "accounting_invariants_verified_via_openpyxl": true,
+  "excel_com_required_for_full_validation": true,
+  "next_step": "Run on Windows with Excel 365 to complete Level B validation"
 }
