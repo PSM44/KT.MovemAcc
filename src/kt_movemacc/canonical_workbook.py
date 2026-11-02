@@ -202,7 +202,7 @@ def generate_canonical_financial_workbook(
                 "Status", "Valid From", "Valid To", "Decision ID", "Version", "Justification"]
     ws4.append(headers4)
     
-    # Get consolidated values for FM mapping
+    # Get consolidated values for FM mapping - use account_code as key (duplicates are identical in source)
     consol_map = {}
     for r in consol_rows:
         key = r["account_code"]
@@ -230,12 +230,10 @@ def generate_canonical_financial_workbook(
                 value_uf = values["eplaza_value_uf"]
                 value_clp = values["eplaza_value_clp"]
                 description = values["eplaza_description"]
-                fm_cell = rule.fm_cell_eplaza
             else:
                 value_uf = values["impulsa_value_uf"]
                 value_clp = values["impulsa_value_clp"]
                 description = values["impulsa_description"]
-                fm_cell = rule.fm_cell_impulsa
             
             ws4.append([
                 rule.mapping_id,
@@ -249,12 +247,12 @@ def generate_canonical_financial_workbook(
                 rule.fm_cell_impulsa,
                 rule.fm_cell_total,
                 rule.coefficient,
-                value_uf,
-                value_uf if entity_code == "F" else 0.0,  # Only show counterpart on second row
-                value_uf * rule.coefficient,
-                value_clp,
-                value_clp if entity_code == "F" else 0.0,
-                value_clp * rule.coefficient,
+                values["eplaza_value_uf"],           # Column L: Eplaza Value UF (always Eplaza)
+                values["impulsa_value_uf"],          # Column M: Impulsa Value UF (always Impulsa)
+                (values["eplaza_value_uf"] + values["impulsa_value_uf"]) * rule.coefficient,  # Column N: Assigned UF = (E+F)*coeff
+                values["eplaza_value_clp"],          # Column O: Eplaza Value CLP
+                values["impulsa_value_clp"],         # Column P: Impulsa Value CLP
+                (values["eplaza_value_clp"] + values["impulsa_value_clp"]) * rule.coefficient,  # Column Q: Assigned CLP
                 rule.status,
                 rule.valid_from,
                 rule.valid_to or "",
@@ -293,19 +291,28 @@ def generate_canonical_financial_workbook(
     
     source_integrity_pass = all(sf["sha256"] for sf in source_files)
     
-    # FM invariant check: D = E + F for each target
+    # FM invariant check: D = E + F for each target (with coefficient applied)
     fm_invariant_pass = True
     fm_invariant_details = []
     for target in TARGETS:
         accounts_in_target = GROUPS.get(target.target_id, [])
+        target_eplaza = 0.0
+        target_impulsa = 0.0
         for account_id, _ in accounts_in_target:
             values = consol_map.get(account_id, {})
-            eplaza = values.get("eplaza_value_uf", 0.0)
-            impulsa = values.get("impulsa_value_uf", 0.0)
-            total = values.get("eplaza_value_uf", 0.0) + values.get("impulsa_value_uf", 0.0)
-            if abs(total - (eplaza + impulsa)) > 0.001:
-                fm_invariant_pass = False
-                fm_invariant_details.append(f"{target.target_id}-{account_id}: total={total} != eplaza+impulsa={eplaza}+{impulsa}")
+            # Find the rule for this account/target to get coefficient
+            rule = next((r for r in rules if r.account_id == account_id and r.fm_target_id == target.target_id), None)
+            coeff = rule.coefficient if rule else 1
+            eplaza = values.get("eplaza_value_uf", 0.0) * coeff
+            impulsa = values.get("impulsa_value_uf", 0.0) * coeff
+            target_eplaza += eplaza
+            target_impulsa += impulsa
+        
+        # Verify FM invariant: total = eplaza + impulsa
+        total = target_eplaza + target_impulsa
+        if abs(total - (target_eplaza + target_impulsa)) > 0.001:
+            fm_invariant_pass = False
+            fm_invariant_details.append(f"{target.target_id}: total={total} != eplaza+impulsa={target_eplaza}+{target_impulsa}")
     
     # Single account to FM target check
     account_to_target = {}
@@ -421,15 +428,27 @@ def generate_canonical_financial_workbook(
             "mapping_status": rule.status
         }
     
-    idx = 1
+    # Deduplicate consolidated rows by account_code (first occurrence wins)
+    seen_accounts = set()
+    unique_consol_rows = []
     for r in consol_rows:
-        # Eplaza row
-        if float(r["eplaza_value_uf"] or 0) != 0 or float(r["impulsa_value_uf"] or 0) != 0:
+        key = r["account_code"]
+        if key and key not in seen_accounts:
+            seen_accounts.add(key)
+            unique_consol_rows.append(r)
+    
+    idx = 1
+    for r in unique_consol_rows:
+        eplaza_val = float(r["eplaza_value_uf"] or 0)
+        impulsa_val = float(r["impulsa_value_uf"] or 0)
+        
+        # Eplaza row - only if Eplaza has non-zero value
+        if eplaza_val != 0:
             fm_info = fm_lookup.get(r["account_code"], {})
             ws6.append([
                 idx, "EPLAZA", r["account_code"], r["semantic_key"], r["heading_text"],
                 r["eplaza_description"] or r["impulsa_description"] or "",
-                float(r["eplaza_value_uf"]) if r["eplaza_value_uf"] else 0.0,
+                eplaza_val,
                 float(r["eplaza_value_clp"]) if r["eplaza_value_clp"] else 0.0,
                 fm_info.get("fm_target_id", "UNMAPPED"),
                 fm_info.get("fm_target_name", "UNMAPPED"),
@@ -438,13 +457,13 @@ def generate_canonical_financial_workbook(
             ])
             idx += 1
         
-        # Impulsa row
-        if float(r["impulsa_value_uf"] or 0) != 0 or float(r["eplaza_value_uf"] or 0) != 0:
+        # Impulsa row - only if Impulsa has non-zero value
+        if impulsa_val != 0:
             fm_info = fm_lookup.get(r["account_code"], {})
             ws6.append([
                 idx, "IMPULSA", r["account_code"], r["semantic_key"], r["heading_text"],
                 r["impulsa_description"] or r["eplaza_description"] or "",
-                float(r["impulsa_value_uf"]) if r["impulsa_value_uf"] else 0.0,
+                impulsa_val,
                 float(r["impulsa_value_clp"]) if r["impulsa_value_clp"] else 0.0,
                 fm_info.get("fm_target_id", "UNMAPPED"),
                 fm_info.get("fm_target_name", "UNMAPPED"),
@@ -465,8 +484,8 @@ def generate_canonical_financial_workbook(
     # ============================================================
     ws7 = wb.create_sheet(title="07_FM_Targets_Summary")
     headers7 = ["FM Target ID", "FM Target Name", "FM Sheet", "FM Cell Eplaza", "FM Cell Impulsa", "FM Cell Total",
-                "Eplaza Total UF", "Impulsa Total UF", "Combined Total UF",
-                "Eplaza Total CLP", "Impulsa Total CLP", "Combined Total CLP",
+                "Eplaza Total UF", "Impulsa Total UF", "Combined Total UF (with coeff)",
+                "Eplaza Total CLP", "Impulsa Total CLP", "Combined Total CLP (with coeff)",
                 "Account Count", "Status"]
     ws7.append(headers7)
     
@@ -476,14 +495,21 @@ def generate_canonical_financial_workbook(
         if tid not in target_totals:
             target_totals[tid] = {"eplaza_uf": 0.0, "impulsa_uf": 0.0, "eplaza_clp": 0.0, "impulsa_clp": 0.0, "accounts": set(), "name": rule.fm_target_name, "sheet": rule.fm_sheet, "cell_e": rule.fm_cell_eplaza, "cell_f": rule.fm_cell_impulsa, "cell_d": rule.fm_cell_total}
         values = consol_map.get(rule.account_id, {"eplaza_value_uf": 0.0, "impulsa_value_uf": 0.0, "eplaza_value_clp": 0.0, "impulsa_value_clp": 0.0})
-        target_totals[tid]["eplaza_uf"] += values["eplaza_value_uf"]
-        target_totals[tid]["impulsa_uf"] += values["impulsa_value_uf"]
-        target_totals[tid]["eplaza_clp"] += values["eplaza_value_clp"]
-        target_totals[tid]["impulsa_clp"] += values["impulsa_value_clp"]
+        coeff = rule.coefficient
+        target_totals[tid]["eplaza_uf"] += values["eplaza_value_uf"] * coeff
+        target_totals[tid]["impulsa_uf"] += values["impulsa_value_uf"] * coeff
+        target_totals[tid]["eplaza_clp"] += values["eplaza_value_clp"] * coeff
+        target_totals[tid]["impulsa_clp"] += values["impulsa_value_clp"] * coeff
         target_totals[tid]["accounts"].add(rule.account_id)
     
     for target in TARGETS:
         totals = target_totals.get(target.target_id, {"eplaza_uf": 0.0, "impulsa_uf": 0.0, "eplaza_clp": 0.0, "impulsa_clp": 0.0, "accounts": set()})
+        eplaza_total = totals["eplaza_uf"]
+        impulsa_total = totals["impulsa_uf"]
+        combined_uf = eplaza_total + impulsa_total
+        eplaza_clp_total = totals["eplaza_clp"]
+        impulsa_clp_total = totals["impulsa_clp"]
+        combined_clp = eplaza_clp_total + impulsa_clp_total
         ws7.append([
             target.target_id,
             target.name,
@@ -491,14 +517,14 @@ def generate_canonical_financial_workbook(
             target.cell_eplaza,
             target.cell_impulsa,
             target.cell_total,
-            totals["eplaza_uf"],
-            totals["impulsa_uf"],
-            totals["eplaza_uf"] + totals["impulsa_uf"],
-            totals["eplaza_clp"],
-            totals["impulsa_clp"],
-            totals["eplaza_clp"] + totals["impulsa_clp"],
+            eplaza_total,
+            impulsa_total,
+            combined_uf,
+            eplaza_clp_total,
+            impulsa_clp_total,
+            combined_clp,
             len(totals["accounts"]),
-            "POPULATED" if (totals["eplaza_uf"] + totals["impulsa_uf"]) > 0 else "ZERO"
+            "POPULATED" if combined_uf > 0 else "ZERO"
         ])
     
     if ws7.max_row > 1:

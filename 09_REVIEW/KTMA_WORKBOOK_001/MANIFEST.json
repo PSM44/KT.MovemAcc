@@ -1,7 +1,7 @@
 {
   "review_id": "KTMA_WORKBOOK_001",
   "created_at": "2026-10-30T21:29:56.778120Z",
-  "updated_at": "2026-11-01T14:05:00.000000",
+  "updated_at": "2026-11-02T12:58:00.000000",
   "period": "2026.08",
   "entities": [
     "EPLAZA",
@@ -24,9 +24,9 @@
     },
     {
       "filename": "CANDIDATE_KTMA_FINANCIAL_WORKBOOK_2026.08.xlsx",
-      "sha256": "5fd0d7958b67ef33844e5ee2f7a344f9cfd84a9eb284879d0c9fa2af166443f5",
+      "sha256": "9fc6b91fc4620272fb288b839d301646a28309a542fa751dba51f75dfd9885bb",
       "size_bytes": 322656,
-      "modified": "2026-11-01T14:05:00.000000",
+      "modified": "2026-11-02T12:58:00.000000",
       "type": "CANDIDATE"
     },
     {
